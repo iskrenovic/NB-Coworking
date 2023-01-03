@@ -1,0 +1,52 @@
+User {
+    createUser
+    getUser
+    deleteUser
+    updateUser
+    getUsers(space_id)
+}
+
+Space {
+    createSpace
+    getSpace
+    deleteSpace
+    updateSpace
+    getSpacesByUserId(user_id)
+    getSpacesByRoomsCount(city, employee_count) -> getAvailabeRooms
+    getSpacesByCity(city)
+}
+
+Room {
+    createRoom
+    getRoom
+    deleteRoom
+    updateRoom
+    getRoomsBySpaceId(space_id)
+    getAvailabeRooms(space_id, employee_count, date1, date2) //Kad trazi biznis?
+}
+
+Place {
+    createPlace
+    getPlace
+    deletePlace
+    updatePlace
+    getAvailablePlaces(space_id, date1, date2)
+}
+
+Reservation {
+    createReservation
+    getReservation
+    deleteReservation
+    updateReservation
+    getReservationsForSpace(space_id, date1, date2) // Vraca sve rezervacije u prostoru SPACE_ID za vreme DATE1-DATE2
+    getReservationsForRoom(room_id, date1, date2) // Vraca sve rezervacije u prostoru SPACE_ID za vreme DATE1-DATE2
+    getFullPrice()
+}
+
+Equipment {
+    createEquipment
+    getEquipment
+    deleteEquipment
+    updateEquipment
+    getEquipmentBySpaceId(space_id)
+}
