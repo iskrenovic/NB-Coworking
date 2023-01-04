@@ -1,11 +1,11 @@
 <template>
     <div class="list">
-        <div v-for="item in list" :key="item._id" @click="clickOnSpace(item)" class="list-element">
+        <div v-for="item in list" :key="item._id" @click="clickToLink(item)" class="list-element">
             <img src="@/assets/coworking_example.jpg"/>
             <div>
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.address }}</h3>
-                <button @click="clickOnSpace(item)">DETAILS</button>
+                <button @click="clickToLink(item)">DETAILS</button>
             </div>
         </div>
     </div>
@@ -20,19 +20,56 @@ export default defineComponent({
         list:{
             type: Array,
             required:true
+        },
+        type:{
+            type:String,
+            required:true
         }
+        // @NINA Type moze da bude ili SPACE, ROOM ILI SEAT
     },
     data(){
-
-    },
-    methods:{
-        clickOnSpace(item){
-            console.log(item._id)
+        return{
+            linkName:'',
+            linkable:true
         }
     },
+    methods:{
+        clickToLink(item){
+            if(!this.linkable) {
+                this.clickToEmit();
+                return;
+            }
+            this.$router.push({name:this.linkName, params:{
+                id:item._id
+            }})
+        },
+        clickToEmit(item){
+            this.$emit('click', item);
+        },
+        setupType(){
+            switch(this.type.toUpperCase()){
+                case "SPACE": 
+                    this.linkName = "SpacePage";                    
+                    return true;                   
+                case "ROOM":
+                    this.linkName = "RoomPage";
+                    return true;
+                case "SEAT":
+                    this.linkName = "SeatPage";
+                    this.linkable = false;
+                    return true;                
+            }  
+            return false;
+        },
+        
+    },
     created(){
-
-    }
+        if(!this.setupType()){
+            console.error("Type must be either 'SPACE', 'ROOM' or 'SEAT'");
+            return;
+        }
+    },
+    emits:['click']
 })
 </script>
 

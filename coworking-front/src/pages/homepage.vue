@@ -5,7 +5,7 @@
             <button @click="loginClick">LOGIN</button>
         </div>
         <search-bar pocetnoMesto="Užice" @pronadjeno="searchPronadjen"/>
-        <space-list :list="spaces"/>
+        <space-list :list="spaces" type="space" />
     </div>
 </template>
 
@@ -35,12 +35,12 @@ export default defineComponent({
                 address:'Nekoga Tamo 12'
             },
             {
-                _id:1,
+                _id:2,
                 name:'Startup Nis',
                 address:'Odmah Iza 69'
             },
             {
-                _id:1,
+                _id:3,
                 name:'Coworkingujemo',
                 address:'Znas Ti Znas 420'
             }]
