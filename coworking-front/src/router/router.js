@@ -4,21 +4,28 @@ import Homepage from '@/pages/homepage.vue'
 import LoginRegister from '@/pages/login-register.vue'
 import SpacePage from '@/pages/space-page.vue'
 import RoomPage from '@/pages/room-page.vue'
+import OwnerDash from '@/pages/owner-dash.vue'
 
 Vue.use(Router);
 
 
+//MORA DA SE ODRADI BEFORE ENTER           
 const r = new Router({
     routes:[
         {
             path:'/',
             name: 'Homepagemain',
-            component: Homepage,            
+            component: Homepage,
         },
         {
             path:'/login',
             name:'Login',
             component:LoginRegister
+        },
+        {
+            path:'/owner',
+            name:'Owner',
+            component:OwnerDash
         },
         {
             path:'/space/:id',

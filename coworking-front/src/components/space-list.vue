@@ -2,10 +2,12 @@
     <div class="list">
         <div v-for="item in list" :key="item._id" @click="clickToLink(item)" class="list-element">
             <img src="@/assets/coworking_example.jpg"/>
-            <div>
+            <div class="space">
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.address }}</h3>
-                <button @click="clickToLink(item)">DETAILS</button>
+                <div class="buttons">
+                    <button v-if="owner" @click="deleteItem(item)">DELETE</button>
+                </div>
             </div>
         </div>
     </div>
@@ -24,17 +26,28 @@ export default defineComponent({
         type:{
             type:String,
             required:true
-        }
+        },
         // @NINA Type moze da bude ili SPACE, ROOM ILI SEAT
+        owner:{
+            type:Boolean,
+            required:false,
+            default:false
+        }
+        // @NINA Ovo se poziva kada gleda u listu vlasnik prostora, ako ti nije jasno kako funkcionise ili zasto je tako objasnicu ti kada se budemo videli
     },
     data(){
         return{
             linkName:'',
-            linkable:true
+            linkable:true,
+            clickable:true
         }
     },
     methods:{
         clickToLink(item){
+            if(!this.clickable){
+                this.clickable = true;
+                return;
+            }
             if(!this.linkable) {
                 this.clickToEmit();
                 return;
@@ -45,6 +58,14 @@ export default defineComponent({
         },
         clickToEmit(item){
             this.$emit('click', item);
+        },
+        deleteItem(item){
+            this.clickable = false;
+            let ans = window.confirm(`Are you sure you want to delete ${item.name} space?`)
+            if(ans){
+                //Ovde treba se pozove funkcija za API
+                console.log("TREBA OBRISATI ITEM:",item);
+            }
         },
         setupType(){
             switch(this.type.toUpperCase()){
@@ -73,6 +94,7 @@ export default defineComponent({
 })
 </script>
 
+
 <style scoped>
 .list {
   display: flex;
@@ -96,7 +118,7 @@ export default defineComponent({
   object-fit: cover;
 }
 
-.list-element div {
+.space {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -107,7 +129,7 @@ export default defineComponent({
   transition: all 0.3s; /* Add a transition to smooth out the hover effect */
 }
 
-.list-element:hover div {
+.space {
   background: rgba(0, 0, 0, 0.8); /* Make the background more opaque on hover */
 }
 
@@ -124,23 +146,28 @@ export default defineComponent({
   color: rgba(255, 255, 255, 0.8);
 }
 
-.list-element button {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
+.buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  position: absolute;  
+  top: 50%;
+  right: 2%;
+  transform: translateY(-50%);
+}
+
+.buttons button {  
   border: none;
   border-radius: 4px;
   background: white;
+  margin-top: 5px;
+  margin-bottom:5px;
+  width:100%;
   color: black;
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
 }
-
-.list-element button:hover {
-  background: #eee;
-}
-
 </style>
