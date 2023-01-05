@@ -2,7 +2,7 @@
     <div class="ui">
         <div class="section">
             <h3>Requests</h3>   
-            <!--LISTA REQUESTA-->
+            <request-list :requests="requests"/>
         </div>
         <div class="section">
             <h3>Spaces</h3>
@@ -22,11 +22,13 @@
 import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
 import spaceForm from '@/components/Owner/space-form.vue';
+import requestList from '@/components/Owner/request-list.vue';
 export default defineComponent({
     name:'owner-dash',
     components:{
         spaceList,
-        spaceForm
+        spaceForm,
+        requestList
     },
     data(){
         return{
@@ -44,6 +46,31 @@ export default defineComponent({
                 _id:3,
                 name:'Coworkingujemo',
                 address:'Znas Ti Znas 420'
+            }],
+            requests:[{
+                _id:1,
+                startTime: new Date(),
+                endTime: new Date(new Date().setDate(new Date().getDate() + 2))
+            },
+            {
+                _id:2,
+                startTime: new Date(),
+                endTime: new Date(new Date().setDate(new Date().getDate() + 3))
+            },
+            {
+                _id:3,
+                startTime: new Date(),
+                endTime: new Date(new Date().setDate(new Date().getDate() + 5))
+            },
+            {
+                _id:4,
+                startTime: new Date(),
+                endTime: new Date(new Date().setDate(new Date().getDate() + 5))
+            },
+            {
+                _id:5,
+                startTime: new Date(),
+                endTime: new Date(new Date().setDate(new Date().getDate() + 5))
             }],
             openCreateSpace:false
         }

@@ -82,7 +82,7 @@ export default defineComponent({
 }
 
 .ui button {
-  width: 100%;
+  width: 100%; 
   background-color: #00bcd4;
   color: white;
   padding: 14px 20px;
