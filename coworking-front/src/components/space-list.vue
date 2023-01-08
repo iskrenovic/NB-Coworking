@@ -2,7 +2,14 @@
     <div class="list">
         <div v-for="item in list" :key="item._id" @click="clickToLink(item)" class="list-element">
             <img src="@/assets/coworking_example.jpg"/>
-            <div class="space">
+            <div class="space" v-if="type == 'equipment'">
+                <h2>{{item.name}}</h2>
+                <h3>{{ item.desc }} - <b>{{ item.price }} RSD</b></h3>
+                <div class="buttons">
+                    <button v-if="owner" @click="deleteItem(item)">DELETE</button>
+                </div>
+            </div>
+            <div class="space" v-else>
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.address }}</h3>
                 <div class="buttons">
