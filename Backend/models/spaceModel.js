@@ -1,19 +1,11 @@
 const  neo4j  = require('../config/neo4j_config');
 
-neo4j.model('User', {
-    username: {        
+neo4j.model('Space', {
+    name: { 
         type: 'string',
         required: true,
-        unique: true
     },
-    password: {
-        type: 'string',
-        required: true
-    } , 
-    role:{
-        type: 'string'
-    },
-    email:{
+    address:{
         type: 'string'
     },
     contact:{

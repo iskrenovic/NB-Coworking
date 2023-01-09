@@ -5,14 +5,13 @@ const redis = require('./config/ws.config')
 
 
 const user = require('./routes/user');
-const customer = require('./routes/customer');
-const deliverer = require('./routes/deliverer');
-const meal = require('./routes/meal');
-const order = require('./routes/order');
-const store = require('./routes/store');
-const category = require('./routes/category')
-const login = require('./routes/login')
-const register = require('./routes/register')
+const equipment = require('./routes/equipment');
+const place = require('./routes/place');
+const reservation = require('./routes/reservation');
+const room = require('./routes/room');
+const space = require('./routes/space');
+//const login = require('./routes/login')
+//const register = require('./routes/register')
 
 
 
