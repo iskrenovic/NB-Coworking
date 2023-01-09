@@ -6,13 +6,15 @@
         </div>
         <div class="section">
             <h3>Spaces</h3>
-            <button @click="createNewSpace()">CREATE NEW</button>
             <space-form v-if="openCreateSpace" @cancel="spaceFormCancel"/>
+            <button v-else @click="createNewSpace()">CREATE NEW</button>
             <space-list :list="list" type="space" owner/>
         </div>
         <div class="section">
             <h3>Equipment</h3>
-            <button @click="createNewEquipment()">CREATE NEW</button>
+            <equipment-form v-if="openEquipmentForm" @cancel="equipmentCancel"/>
+            <button v-else @click="createNewEquipment()">CREATE NEW</button>
+            <space-list :list="equipmentList" type="equipment" owner/>
             <!--LISTA EQUIPMENTA-->
         </div>
     </div>
@@ -23,12 +25,14 @@ import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
 import spaceForm from '@/components/Owner/space-form.vue';
 import requestList from '@/components/Owner/request-list.vue';
+import equipmentForm from '@/components/Owner/equipment-form.vue';
 export default defineComponent({
     name:'owner-dash',
     components:{
         spaceList,
         spaceForm,
-        requestList
+        requestList,
+        equipmentForm
     },
     data(){
         return{
@@ -46,6 +50,24 @@ export default defineComponent({
                 _id:3,
                 name:'Coworkingujemo',
                 address:'Znas Ti Znas 420'
+            }],
+            equipmentList:[{
+                _id:1,
+                name:'Macbook',
+                desc:'jAbuka',
+                price:350
+            },
+            {
+                _id:2,
+                name:'Stampac',
+                desc:'Laserjet',
+                price:350
+            },
+            {
+                _id:3,
+                name:'Kozna stolica',
+                desc:'Udobna',
+                price:350
             }],
             requests:[{
                 _id:1,
@@ -72,7 +94,8 @@ export default defineComponent({
                 startTime: new Date(),
                 endTime: new Date(new Date().setDate(new Date().getDate() + 5))
             }],
-            openCreateSpace:false
+            openCreateSpace:false,
+            openEquipmentForm: false
         }
     },
     methods:{
@@ -82,8 +105,11 @@ export default defineComponent({
         spaceFormCancel(){
             this.openCreateSpace = false;
         },
+        equipmentCancel(){
+            this.openEquipmentForm = false;
+        },
         createNewEquipment(){
-
+            this.openEquipmentForm = true;
         }
     }
 })
