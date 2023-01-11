@@ -5,15 +5,24 @@
             <div class="space" v-if="type == 'equipment'">
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.desc }} - <b>{{ item.price }} RSD</b></h3>
-                <div class="buttons">
-                    <button v-if="owner" @click="deleteItem(item)">DELETE</button>
+                <div class="buttons" v-if="owner">
+                    <button @click="deleteItem(item)">DELETE</button>
+                </div>
+            </div>
+            <div class="space" v-else-if="type == 'rooms'">
+                <h2>{{item.name}}</h2>
+                <h3>{{ item.area }} mkv</h3>
+                <h3>Sprat: {{ item.floor }}</h3>
+                <h3>Broj mesta:{{ item.seatCount }}</h3>
+                <div class="buttons" v-if="owner">
+                    <button @click="deleteItem(item)">DELETE</button>
                 </div>
             </div>
             <div class="space" v-else>
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.address }}</h3>
-                <div class="buttons">
-                    <button v-if="owner" @click="deleteItem(item)">DELETE</button>
+                <div class="buttons" v-if="owner">
+                    <button @click="deleteItem(item)">DELETE</button>
                 </div>
             </div>
         </div>
@@ -77,10 +86,12 @@ export default defineComponent({
         setupType(){
             switch(this.type.toUpperCase()){
                 case "SPACE": 
-                    this.linkName = "SpacePage";                    
+                    this.linkName = "SpacePage";  
+                    if(this.owner) this.linkName = "OwnerSpacePage"                  
                     return true;                   
-                case "ROOM":
+                case "ROOMS":
                     this.linkName = "RoomPage";
+                    if(this.owner) this.linkName = "OwnerRoomPage"   
                     return true;
                 case "SEAT":
                     this.linkName = "SeatPage";
@@ -93,7 +104,7 @@ export default defineComponent({
     },
     created(){
         if(!this.setupType()){
-            console.error("Type must be either 'SPACE', 'ROOM' or 'SEAT'");
+            console.error("Type must be either 'SPACE', 'ROOMS' or 'SEAT'");
             return;
         }
     },

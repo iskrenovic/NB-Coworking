@@ -20,7 +20,7 @@ export default new Vuex.Store({
                 console.log(err);
             }
         }
-    },
+    },  
     mutations:{
 
     }
