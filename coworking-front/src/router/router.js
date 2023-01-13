@@ -33,14 +33,19 @@ const r = new Router({
             component:SpacePage
         },
         {
+            path:'/owner/space/:id',
+            name:'OwnerSpacePage',
+            component:SpacePage
+        },
+        {
             path:'/room/:id',
             name:'RoomPage',
             component:RoomPage
         },
         {
-            path:'/seat/:id',
-            name:'SeatPage',
-            component:LoginRegister
+            path:'/owner/room/:id',
+            name:'OwnerRoomPage',
+            component:RoomPage
         }
         
     ],
