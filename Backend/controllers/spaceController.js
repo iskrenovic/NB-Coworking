@@ -4,7 +4,7 @@ const space = require('../models/spaceModel');
 const GetSpace = async(req,res) =>{
     let uuid = req.params.id
     try { 
-        let Space = await neo4j.model('Space').find(ID)
+        let Space = await neo4j.model('Space').find(uuid)
         let space = {
             name : Space._properties.get("name"),
             address : Space._properties.get("address"),
@@ -72,5 +72,6 @@ module.exports = {
     GetSpace,
     CreateSpace,
     DeleteSpace,
-    UpdateSpace
+    UpdateSpace,
+    GetSpaceByOwnerId
 };

@@ -2,7 +2,7 @@
     <div>
         <div class="top-bar">
             <img /> <!--LOGO-->
-            <button @click="loginClick">LOGIN</button>
+            <button @click="loginClick">{{(isLoggedIn?'PROFILE':'LOGIN')}}</button>
         </div>
         <search-bar pocetnoMesto="Užice" @pronadjeno="searchPronadjen"/>
         <space-list :list="spaces" type="space" />
