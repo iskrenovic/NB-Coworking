@@ -30,7 +30,7 @@ const CreateEquipment = (req,res) => {
             })
             .catch(err => console.log(err))
        
-        res.send(meal).status(200)
+        res.send(equipment).status(200)
             
         })        
     .catch(err => res.send(err).status(400));

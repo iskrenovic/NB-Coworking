@@ -36,7 +36,7 @@ const CreateUser = (req,res) => {
             })
             .catch(err => console.log(err))
        
-        res.send(meal).status(200)
+        res.send(user).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
