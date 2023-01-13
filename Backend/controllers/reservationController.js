@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const neo4j = require('../config/neo4j_config');
 const reservation = require('../models/reservationModel');
 
@@ -74,7 +73,3 @@ module.exports = {
     DeleteReservation,
     UpdateReservation
 };
-=======
-//To Be Done
-// TODO
->>>>>>> efe5afcd0d8dd7c6b597abcce0736b4a7854a9dc
