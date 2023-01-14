@@ -1,7 +1,10 @@
 <template>
     <div>
+        <div class="reservation" v-if="reserved">
+           <reservationForm  @potvrdjeno="createPotvrdjenu"/>
+        </div>
        <button @click="goBack">Back</button> 
-       <space-list :list="list" type="seat" :owner="owner"/>
+       <space-list :list="list" type="seat" :owner="owner" @reserveClick="crtajReserve"/>
     </div>
 </template>
 
@@ -9,11 +12,13 @@
 <script>
 import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
+import reservationForm from '@/components/reservationForm.vue';
 export default defineComponent({
     name:'room-page',
     components:{
-        spaceList
-    },
+    spaceList,
+    reservationForm
+},
     data(){
         return {
             list:[{
@@ -37,10 +42,18 @@ export default defineComponent({
     methods:{
         goBack(){
             this.$router.push({name:'SpacePage'});
+        },
+        createPotvrdjenu(datum, pocetak, kraj){
+            console.log("Potvrdjena rezervacija za datum "+datum + " " + pocetak+"->"+kraj);
+        },
+        crtajReserve(rezervisano){
+            this.reserved=rezervisano;
+            console.log("crtam rezerve "+rezervisano);
         }
     },
     created(){
-        this.owner = this.$route.name == "OwnerRoomPage"
+        this.owner = this.$route.name == "OwnerRoomPage",
+        this.reserved=false
     }
 })
 </script>

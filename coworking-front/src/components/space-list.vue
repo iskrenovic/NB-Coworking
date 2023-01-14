@@ -95,11 +95,8 @@ export default defineComponent({
         },
         reserveItem(item){
             this.clickable=false;
-            let ans = window.confirm(`Are you sure you want to reserve ${item.name} seat?`)
-            if(ans){
-                //Ovde treba se pozove funkcija za API
-                console.log("REZERVISAN0 MESTO:",item);
-            }
+            this.$emit('reserveClick', true);
+            console.log("Pokusaj rezervacije za"+item);
         },
         setupType(){
             switch(this.type.toUpperCase()){
@@ -126,7 +123,7 @@ export default defineComponent({
             return;
         }
     },
-    emits:['click']
+    emits:['click', 'reserveClick']
 })
 </script>
 
