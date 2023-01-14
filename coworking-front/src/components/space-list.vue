@@ -18,6 +18,16 @@
                     <button @click="deleteItem(item)">DELETE</button>
                 </div>
             </div>
+            <div class="space" v-else-if="type == 'seat'">
+                <h2>{{item.name}}</h2>
+                <h3>{{ item.price }} rsd</h3>
+                <div class="buttons">
+                    <button @click="reserveItem(item)">RESERVE</button>
+                </div>
+                <div class="buttons" v-if="owner">
+                    <button @click="deleteItem(item)">DELETE</button>
+                </div>
+            </div>
             <div class="space" v-else>
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.address }}</h3>
@@ -81,6 +91,14 @@ export default defineComponent({
             if(ans){
                 //Ovde treba se pozove funkcija za API
                 console.log("TREBA OBRISATI ITEM:",item);
+            }
+        },
+        reserveItem(item){
+            this.clickable=false;
+            let ans = window.confirm(`Are you sure you want to reserve ${item.name} seat?`)
+            if(ans){
+                //Ovde treba se pozove funkcija za API
+                console.log("REZERVISAN0 MESTO:",item);
             }
         },
         setupType(){
