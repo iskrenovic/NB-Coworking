@@ -29,6 +29,9 @@ export default defineComponent({
             this.$emit('potvrdjeno', this.datumRezervacije,this.pocetakRezervacije, this.krajRezervacije);
         },
     },
+    created(){
+        console.log("Otvoreno");
+    },
     emits:['potvrdjeno']
 })
 </script>

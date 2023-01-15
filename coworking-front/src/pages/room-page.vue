@@ -1,10 +1,8 @@
 <template>
-    <div>
-        <div class="reservation" v-if="reserved">
-           <reservationForm  @potvrdjeno="createPotvrdjenu"/>
-        </div>
-       <button @click="goBack">Back</button> 
-       <space-list :list="list" type="seat" :owner="owner" @reserveClick="crtajReserve"/>
+    <div>        
+        <reservationForm v-if="reserved" @potvrdjeno="createPotvrdjenu"/>
+        <button @click="goBack">Back</button> 
+       <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve"/>
     </div>
 </template>
 
@@ -36,7 +34,8 @@ export default defineComponent({
                 name:'Mesto3',
                 price:1400
             }],
-            owner:false
+            owner:false,
+            reserved:false
         }
     },
     methods:{
@@ -46,9 +45,9 @@ export default defineComponent({
         createPotvrdjenu(datum, pocetak, kraj){
             console.log("Potvrdjena rezervacija za datum "+datum + " " + pocetak+"->"+kraj);
         },
-        crtajReserve(rezervisano){
-            this.reserved=rezervisano;
-            console.log("crtam rezerve "+rezervisano);
+        crtajReserve(){
+            this.reserved=true;
+            console.log("crtam rezerve ",this.reserved);
         }
     },
     created(){

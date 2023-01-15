@@ -20,10 +20,7 @@
             </div>
             <div class="space" v-else-if="type == 'seat'">
                 <h2>{{item.name}}</h2>
-                <h3>{{ item.price }} rsd</h3>
-                <div class="buttons">
-                    <button @click="reserveItem(item)">RESERVE</button>
-                </div>
+                <h3>{{ item.price }} rsd</h3>                
                 <div class="buttons" v-if="owner">
                     <button @click="deleteItem(item)">DELETE</button>
                 </div>
@@ -92,11 +89,6 @@ export default defineComponent({
                 //Ovde treba se pozove funkcija za API
                 console.log("TREBA OBRISATI ITEM:",item);
             }
-        },
-        reserveItem(item){
-            this.clickable=false;
-            this.$emit('reserveClick', true);
-            console.log("Pokusaj rezervacije za"+item);
         },
         setupType(){
             switch(this.type.toUpperCase()){
