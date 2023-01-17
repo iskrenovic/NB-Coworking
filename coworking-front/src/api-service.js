@@ -5,6 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state:{
+        user:null,
         spaces:null,
         rooms:null,
         seats:null,
@@ -26,31 +27,46 @@ export default new Vuex.Store({
         },
         getRequests(state){
             return state.requests;
+        },
+        getUser(state){
+            return state.user;
         }
     },
     actions:{
-        async getSpaces(){
-            try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
-                callback(res.data);
-            }
-            catch (err){
-                console.log(err);
-            }
-        },
-        async addSpace(commit, space) {
-            return await Api().post('/api/restaraunt-bar/article/createArticle', space).then(res=>{
+        async createAccount({commit}, account) {
+            return await Api().post('/api/user/createUser', account).then(res=>{
                 if(res.status == 200){
-                    commit('setSpace', res.data);
+                    commit('setUser', res.data);
+                    Vue.$cookies.set('uId', res.data.ID);
+                    console.log(res.data);
                 }
                 else{
                     console.error(res);
                 }
             })
         },
-        async deleteSpace(commit, id){
+        async getSpaces(){
             try{
-                let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);
+                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
+                console.log(res.data);
+            }
+            catch (err){
+                console.log(err);
+            }
+        },
+        async addSpace({commit}, space) {
+            return await Api().post('/api/space/createSpace', space).then(res=>{
+                if(res.status == 200){
+                    commit('addNewSpace', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            })
+        },
+        async deleteSpace({commit}, id){
+            try{
+                let res = await Api().delete(`api/space/deleteSpace/${id}`);
                 if(res.status == 200)
                     commit('removeSpace', id);
                 else
@@ -60,10 +76,26 @@ export default new Vuex.Store({
                 console.log(err);
             }  
         },
+        async getSpacesByUserId({commit}, req){
+            try{
+                let res = await Api().get(`api/space/getSpaceByOwnerId/${req.userID}`);
+                if(res.status == 200){
+                    req.callback(res.data);
+                    commit('setSpaces', res.data);
+                }
+                else{
+                    req.callback([]);
+                }
+                console.log(res.data);
+            }
+            catch (err){
+                console.log(err);
+            }
+        },
         async getRooms(){
             try{
                 let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
-                callback(res.data);
+                console.log(res.data);
             }
             catch (err){
                 console.log(err);
@@ -94,7 +126,7 @@ export default new Vuex.Store({
         async getEquipment(){
             try{
                 let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
-                callback(res.data);
+                console.log(res.data);
             }
             catch (err){
                 console.log(err);
@@ -125,7 +157,7 @@ export default new Vuex.Store({
         async getSeats(){
             try{
                 let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
-                callback(res.data);
+                console.log(res.data);
             }
             catch (err){
                 console.log(err);
@@ -156,7 +188,7 @@ export default new Vuex.Store({
         async getRequests(){
             try{
                 let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
-                callback(res.data);
+                console.log(res.data);
             }
             catch (err){
                 console.log(err);
@@ -186,6 +218,9 @@ export default new Vuex.Store({
         },
     },  
     mutations:{
+        setUser(state, user){
+            state.user = user;
+        },
         setSpaces(state, spaces){
             state.spaces = spaces;
         },

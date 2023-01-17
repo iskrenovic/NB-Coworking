@@ -44,15 +44,14 @@ const CreateUser = (req,res) => {
         role: userBody.role,
         email: userBody.email,
         contact: userBody.contact
-    }).then(user => {    
+    }).then(user => {   
         
-            
-            neo4j.cypher(`match (u:User {ID: "${user._properties.get("ID")}"})`)
-            .then(result => {                 
-            })
-            .catch(err => console.log(err))
-       
-        res.send(user).status(200)
+        res.send({
+            username: user._properties.get('username'),
+            ID: user._properties.get('ID'),
+            role: user._properties.get('role'),
+            email: user._properties.get('email'),
+        }).status(200)
             
         })        
     .catch(err => res.send(err).status(400));

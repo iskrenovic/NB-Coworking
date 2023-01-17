@@ -80,13 +80,14 @@ export default defineComponent({
             }})
         },
         clickToEmit(item){
-            this.$emit('click', r);
+            this.$emit('click', item);
         },
-        deleteItem(item){
+        async deleteItem(item){
             this.clickable = false;
             let ans = window.confirm(`Are you sure you want to delete ${item.name} space?`)
             if(ans){
-                //Ovde treba se pozove funkcija za API
+                //TODO
+                await this.$store.dispatch('deleteSpace', item.ID);
                 console.log("TREBA OBRISATI ITEM:",item);
             }
         },

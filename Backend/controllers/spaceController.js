@@ -21,7 +21,7 @@ const GetSpace = async(req,res) =>{
     }
 }
 
-/*const SpacesToJSON = (records) =>{
+const SpacesToJSON = (records) =>{
     let item= []    
     records.forEach(element => {
         let added = false
@@ -35,17 +35,18 @@ const GetSpace = async(req,res) =>{
             item.push({section:element._fields[0].properties.category,meals:[element._fields[0].properties]})
     })
     return item
-} */
+} 
 
-const CreateSpace = (req,res) => {    
+const CreateSpace = async (req,res) => {    
     const spaceBody = req.body    
-    neo4j.model("Space").create({
+    await neo4j.model("Space").create({
         name: spaceBody.name,
         address: spaceBody.address,
         contact: spaceBody.contact,
-    }).then(space => {                        
-            neo4j.cypher(`match (s:Space {ID: "${space._properties.get("ID")}"})`)
-            .then(result => {                 
+    }).then(async space => {
+            neo4j.writeCypher(`match (s:Space {ID: "${space._properties.get("ID")}"}),(u:User {ID: "${req.body.userID}"}) create (u)-[rel:OWNER]->(s) return u,s,rel`)
+            .then(result => { 
+                console.log(result);                
             })
             .catch(err => console.log(err))
        
@@ -56,16 +57,16 @@ const CreateSpace = (req,res) => {
 }
 
 const DeleteSpace = async (req,res) => { 
-    let spaceBody = req.body   
     try { 
-        let space = await neo4j.model("Space").find(spaceBody.ID)
-        if (!space) {
+        let result = await neo4j.model('Space').find(req.params.ID);
+        if (!result) {
             return res.status(400).send("Object not found.")
         }
-        space.delete()
-        res.status(200).send("")
+        await result.delete();
+        res.status(200).send("DELETE COMPLETE")
     }
     catch(e) { 
+        console.error(e.message);
         res.status(400).end(e.message || e.toString())
     }
 }
@@ -87,18 +88,18 @@ const UpdateSpace = async (req,res) => {
     }
 }
 
-/*const GetSpaceByOwnerId = (req,res) => {
+const GetSpaceByOwnerId = (req,res) => {
     neo4j.cypher(`match (user:User {ID : "${req.params.ID}"})
-    -[rel:OFFERS]->(space:Space) return space`).then(result => {
+    -[rel:OWNER]->(space:Space) return space`).then(result => {
         let spaces = SpacesToJSON(result.records)    
         res.send(spaces).status(200)
     }).catch(err => console.log(err))
-}*/
+}
 
 module.exports = {
     GetSpace,
     CreateSpace,
     DeleteSpace,
     UpdateSpace,
-    //GetSpaceByOwnerId
+    GetSpaceByOwnerId
 };

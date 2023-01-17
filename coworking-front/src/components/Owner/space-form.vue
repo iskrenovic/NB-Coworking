@@ -45,7 +45,12 @@ export default defineComponent({
         },
         createSpace(){
             if(validateObjects(this.name, this.address, this.phoneNo, this.image)){
-                //Ovde ide API
+                this.$store.dispatch('addSpace', {
+                    name:this.name,
+                    address:this.address,
+                    contact: this.phoneNo,
+                    userID:this.$cookies.get('uId')
+                });
                 console.log("VALIDAN INPUT")
             }
             else{

@@ -24,18 +24,17 @@ app.use(express.urlencoded({extended : false}));
 app.use(cors());
 
 
-app.use('/api/customer',equipment);
-app.use('/api/deliverer',place);
-app.use('/api/meal',reservation);
-app.use('/api/order',room);
-app.use('/api/store',space);
+app.use('/api/equipment',equipment);
+app.use('/api/place',place);
+app.use('/api/reservation',reservation);
+app.use('/api/room',room);
+app.use('/api/space',space);
 //app.use('/api/login',login); 
 //app.use('/api/register',register)
 //app.use('/api/category',category)
 app.use('/api/user',user);// da ne bi smo mogli da kreiramo praznog usera jer je on kao abstraktna klasa 
 
 
-console.log("NEO4J", neo4j.model('Space'));
 
 
 /*koristiti neku od ovih funkcija samo kad je potrebno izmeniti schemu, u ostalim situacijama nema potrebe*/

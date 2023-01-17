@@ -34,13 +34,21 @@ export default defineComponent({
                 this.registerOpen = false;
                 return;
             }
+            
             console.log(this.username, this.password);
         },
-        register(){
+        async register(){
             if(!this.registerOpen){
                 this.registerOpen = true;
                 return;
             }
+            await this.$store.dispatch('createAccount',{
+                username:this.username,
+                password:this.password,
+                email:this.email,
+                contact:this.phoneNo,
+                role:'owner'
+            })
             console.log(this.username, this.password, this.email, this.phoneNo);
         }
     }

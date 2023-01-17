@@ -36,21 +36,7 @@ export default defineComponent({
     },
     data(){
         return{
-            list:[{
-                _id:1,
-                name:'Coworking Nis',
-                address:'Nekoga Tamo 12'
-            },
-            {
-                _id:2,
-                name:'Startup Nis',
-                address:'Odmah Iza 69'
-            },
-            {
-                _id:3,
-                name:'Coworkingujemo',
-                address:'Znas Ti Znas 420'
-            }],
+            list:[],
             equipmentList:[{
                 _id:1,
                 name:'Macbook',
@@ -111,6 +97,15 @@ export default defineComponent({
         createNewEquipment(){
             this.openEquipmentForm = true;
         }
+    },
+    async created(){
+        await this.$store.dispatch('getSpacesByUserId', {
+            userID:this.$cookies.get('uId'),
+            callback:(list)=>{
+                this.list = list;
+                console.log(this.list);
+            }
+        });
     }
 })
 </script>
