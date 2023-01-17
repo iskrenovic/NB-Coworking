@@ -1,7 +1,7 @@
 const neo4j = require('../config/neo4j_config');
 const user = require('../models/userModel');
 
-/*const UsersToJSON = (records) =>{
+const UsersToJSON = (records) =>{
     let item= []    
     records.forEach(element => {
         let added = false
@@ -15,7 +15,7 @@ const user = require('../models/userModel');
             item.push({section:element._fields[0].properties.category,meals:[element._fields[0].properties]})
     })
     return item
-}*/
+}
 
 const GetUser = async(req,res) =>{
     let uuid = req.params.ID
@@ -36,22 +36,24 @@ const GetUser = async(req,res) =>{
     }
 }
 
-const CreateUser = (req,res) => {    
+const CreateUser = async (req,res) => {    
     const userBody = req.body    
+    //console.log(userBody)
     neo4j.model("User").create({
         username: userBody.username,
         password: userBody.password,
         role: userBody.role,
         email: userBody.email,
         contact: userBody.contact
-    }).then(user => {   
-        
-        res.send({
-            username: user._properties.get('username'),
-            ID: user._properties.get('ID'),
-            role: user._properties.get('role'),
-            email: user._properties.get('email'),
-        }).status(200)
+    }).then(async user => {    
+            //console.log("Uso sam")      
+            await neo4j.writeCypher(`match (u:User {ID: "${user._properties.get("ID")}"}),(s:Space {ID: "${req.body.spaceID}"}) create (s)-[rel:USESSPACE]->(u) return s,u,rel`)
+            .then(result => { 
+                console.log(result);                
+            })
+            .catch(err => console.log(err))
+       
+        res.send(user).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
@@ -90,17 +92,18 @@ const UpdateUser = async (req,res) => {
     }
 }
 
-/*const GetUserBySpaceId = (req,res) => {
+const GetUserBySpaceId = (req,res) => {
     neo4j.cypher(`match (space:Space {ID : "${req.params.ID}"})
     -[rel:CONTAINS]->(user:User) return user`).then(result => {
         let users = UsersToJSON(result.records)    
         res.send(users).status(200)
     }).catch(err => console.log(err))
-}*/
+}
 
 module.exports = {
     GetUser,
     CreateUser,
     DeleteUser,
-    UpdateUser
+    UpdateUser,
+    GetUserBySpaceId
 };
