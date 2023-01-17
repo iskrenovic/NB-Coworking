@@ -2,7 +2,7 @@ const neo4j = require('../config/neo4j_config');
 const space = require('../models/spaceModel');
 
 const GetSpace = async(req,res) =>{
-    let uuid = req.params.id
+    let uuid = req.params.ID
     try { 
         let Space = await neo4j.model('Space').find(uuid)
         let space = {
@@ -17,6 +17,22 @@ const GetSpace = async(req,res) =>{
         res.status(500).end(e.message || e.toString())
     }
 }
+
+/*const SpacesToJSON = (records) =>{
+    let item= []    
+    records.forEach(element => {
+        let added = false
+        item.forEach(e => {
+            if (e.section == element._fields[0].properties.category){
+                e.meals.push(element._fields[0].properties)   
+                added = true    
+            }               
+        })
+        if (added == false)
+            item.push({section:element._fields[0].properties.category,meals:[element._fields[0].properties]})
+    })
+    return item
+} */
 
 const CreateSpace = (req,res) => {    
     const spaceBody = req.body    
@@ -67,6 +83,14 @@ const UpdateSpace = async (req,res) => {
         res.status(500).send(e);
     }
 }
+
+/*const GetSpaceByOwnerId = (req,res) => {
+    neo4j.cypher(`match (user:User {ID : "${req.params.ID}"})
+    -[rel:OFFERS]->(space:Space) return space`).then(result => {
+        let spaces = SpacesToJSON(result.records)    
+        res.send(spaces).status(200)
+    }).catch(err => console.log(err))
+}*/
 
 module.exports = {
     GetSpace,

@@ -2,9 +2,9 @@ const neo4j = require('../config/neo4j_config');
 const reservation = require('../models/reservationModel');
 
 const GetReservation = async(req,res) =>{
-    let uuid = req.params.id
+    let uuid = req.params.ID
     try { 
-        let Reservation = await neo4j.model('Reservation').find(ID)
+        let Reservation = await neo4j.model('Reservation').find(uuid)
         let reservation = {
             dateStart : Reservation._properties.get("dateStart"),
             dateEnd : Reservation._properties.get("dateEnd"),

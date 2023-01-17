@@ -2,9 +2,9 @@ const neo4j = require('../config/neo4j_config');
 const room = require('../models/roomModel');
 
 const GetRoom = async(req,res) =>{
-    let uuid = req.params.id
+    let uuid = req.params.ID
     try { 
-        let Room = await neo4j.model('Room').find(ID)
+        let Room = await neo4j.model('Room').find(uuid)
         let room = {
             name : Room._properties.get("name"),
             floor : Room._properties.get("floor"),

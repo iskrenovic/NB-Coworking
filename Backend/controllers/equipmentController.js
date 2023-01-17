@@ -2,9 +2,9 @@ const neo4j = require('../config/neo4j_config');
 const equipment = require('../models/equipmentModel');
 
 const GetEquipment = async(req,res) =>{
-    let uuid = req.params.id
+    let uuid = req.params.ID
     try { 
-        let Equipment = await neo4j.model('Equipment').find(ID)
+        let Equipment = await neo4j.model('Equipment').find(uuid)
         let equipment = {
             type : Equipment._properties.get("type"),
             description : Equipment._properties.get("description"),

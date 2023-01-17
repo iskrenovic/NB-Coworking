@@ -2,9 +2,9 @@ const neo4j = require('../config/neo4j_config');
 const place = require('../models/placeModel');
 
 const GetPlace = async(req,res) =>{
-    let uuid = req.params.id
+    let uuid = req.params.ID
     try { 
-        let Place = await neo4j.model('Place').find(ID)
+        let Place = await neo4j.model('Place').find(uuid)
         let place = {
             price : Place._properties.get("price"),
             ID : Place._properties.get("ID"),

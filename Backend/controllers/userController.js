@@ -1,10 +1,26 @@
 const neo4j = require('../config/neo4j_config');
 const user = require('../models/userModel');
 
+/*const UsersToJSON = (records) =>{
+    let item= []    
+    records.forEach(element => {
+        let added = false
+        item.forEach(e => {
+            if (e.section == element._fields[0].properties.category){
+                e.meals.push(element._fields[0].properties)   
+                added = true    
+            }               
+        })
+        if (added == false)
+            item.push({section:element._fields[0].properties.category,meals:[element._fields[0].properties]})
+    })
+    return item
+}*/
+
 const GetUser = async(req,res) =>{
-    let uuid = req.params.id
+    let uuid = req.params.ID
     try { 
-        let User = await neo4j.model('User').find(ID)
+        let User = await neo4j.model('User').find(uuid)
         let user = {
             username : User._properties.get("username"),
             password : User._properties.get("password"),
@@ -74,6 +90,14 @@ const UpdateUser = async (req,res) => {
         res.status(500).send(e);
     }
 }
+
+/*const GetUserBySpaceId = (req,res) => {
+    neo4j.cypher(`match (space:Space {ID : "${req.params.ID}"})
+    -[rel:CONTAINS]->(user:User) return user`).then(result => {
+        let users = UsersToJSON(result.records)    
+        res.send(users).status(200)
+    }).catch(err => console.log(err))
+}*/
 
 module.exports = {
     GetUser,
