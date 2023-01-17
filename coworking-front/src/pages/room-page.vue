@@ -2,7 +2,7 @@
     <div>        
         <reservationForm v-if="reserved" @potvrdjeno="createPotvrdjenu"/>
         <button @click="goBack">Back</button> 
-       <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve"/>
+        <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve"/>
     </div>
 </template>
 

@@ -80,7 +80,7 @@ export default defineComponent({
             }})
         },
         clickToEmit(item){
-            this.$emit('click', item);
+            this.$emit('click', r);
         },
         deleteItem(item){
             this.clickable = false;
@@ -115,7 +115,7 @@ export default defineComponent({
             return;
         }
     },
-    emits:['click', 'reserveClick']
+    emits:['click']
 })
 </script>
 

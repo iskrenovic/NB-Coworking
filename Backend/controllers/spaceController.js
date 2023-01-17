@@ -3,10 +3,13 @@ const space = require('../models/spaceModel');
 
 const GetSpace = async(req,res) =>{
     let uuid = req.params.ID
+    console.log("ID je:", uuid);    
     try { 
-        let Space = await neo4j.model('Space').find(uuid)
+        console.log("Ja sam ovde i dajem sve od sebe");
+        let Space = await neo4j.findById('Space', uuid);
+        console.log("VRACENO JE", Space);
         let space = {
-            name : Space._properties.get("name"),
+            name : Space._properties.get("name"), 
             address : Space._properties.get("address"),
             ID : Space._properties.get("ID"),
             contact : Space._properties.get("contact"),
@@ -97,5 +100,5 @@ module.exports = {
     CreateSpace,
     DeleteSpace,
     UpdateSpace,
-    GetSpaceByOwnerId
+    //GetSpaceByOwnerId
 };
