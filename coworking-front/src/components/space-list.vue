@@ -18,6 +18,13 @@
                     <button @click="deleteItem(item)">DELETE</button>
                 </div>
             </div>
+            <div class="space" v-else-if="type == 'seat'">
+                <h2>{{item.name}}</h2>
+                <h3>{{ item.price }} rsd</h3>                
+                <div class="buttons" v-if="owner">
+                    <button @click="deleteItem(item)">DELETE</button>
+                </div>
+            </div>
             <div class="space" v-else>
                 <h2>{{item.name}}</h2>
                 <h3>{{ item.address }}</h3>
@@ -108,7 +115,7 @@ export default defineComponent({
             return;
         }
     },
-    emits:['click']
+    emits:['click', 'reserveClick']
 })
 </script>
 
