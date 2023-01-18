@@ -6,7 +6,7 @@ const GetSpace = async(req,res) =>{
     //console.log("ID je:", uuid);    
     try { 
         //console.log("Ja sam ovde i dajem sve od sebe");
-        let Space = await neo4j.findById('Space', uuid);
+        let Space = await neo4j.find('Space', uuid);
         //console.log("VRACENO JE", Space);
         let space = {
             name : Space._properties.get("name"), 
@@ -68,7 +68,7 @@ const CreateSpace = async (req,res) => {
 
 const DeleteSpace = async (req,res) => { 
     try { 
-        let result = await neo4j.model('Space').findById(req.params.ID);
+        let result = await neo4j.model('Space').find(req.params.ID);
         if (!result) {
             return res.status(400).send("Object not found.")
         }
@@ -83,7 +83,7 @@ const DeleteSpace = async (req,res) => {
 
 const UpdateSpace = async (req,res) => { 
     try {
-        let space = await neo4j.model('Space').findById(req.params.ID);
+        let space = await neo4j.model('Space').find(req.params.ID);
         if (!space) { 
             res.status(400).send("Couldn't find space.");
             return;
