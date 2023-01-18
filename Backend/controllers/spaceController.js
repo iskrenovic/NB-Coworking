@@ -32,11 +32,15 @@ const RecordsToJSON = (records) =>{
 
 const SpacesToJSON = (records) =>{
     let item= []
-    console.log(records);  
     records.forEach(element => {
-        item.push({
-            ID: element._properties.get('ID'),
-            name:element._properties.get('name'),            
+        element._fields.forEach(field=>{
+            console.log(field.properties);
+            item.push({
+                ID: field.properties.ID,
+                name:field.properties.name,
+                address:field.properties.address      
+            })
+
         })
     })
     return item
@@ -97,7 +101,7 @@ const UpdateSpace = async (req,res) => {
 const GetSpaceByOwnerId = (req,res) => {
     console.log(req.params.ID);
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:OWNER]->(space:Space) return space`).then(result => {
-        console.log(result);
+        console.log(result.records);
         let spaces = SpacesToJSON(result.records)    
         res.send(spaces).status(200)
     }).catch(err => console.log(err))
