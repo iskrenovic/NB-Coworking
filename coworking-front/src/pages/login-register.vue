@@ -8,6 +8,15 @@
         <input v-if="registerOpen" type="email" v-model="email"/>
         <h3 v-if="registerOpen">Phone No.:</h3>
         <input v-if="registerOpen" type="tel" v-model="phoneNo"/>
+        <h3 v-if="registerOpen">Account type:</h3>
+        <select v-model="accType" v-if="registerOpen">
+            <option disabled :value="''">SELECT TYPE OF ACCOUNT</option>
+            <option :value="'owner'">Property Owner</option>
+            <option :value="'business'">Business</option>
+            <option :value="'user'">Freelancer</option>
+        </select>
+        <h3 v-if="registerOpen && accType == 'business'">Number of employees</h3>
+        <input v-if="registerOpen && accType == 'business'" type="number" v-model="employeeNo"/>
         <button @click="login">LOGIN</button>
         <button @click="register">REGISTER</button>
     </div>
@@ -16,7 +25,7 @@
 
 <script>
 import { defineComponent } from '@vue/composition-api'
-
+import {validateObjects} from '@/helpers/data-cheker'
 export default defineComponent({
     name:'login-register',
     data(){
@@ -25,7 +34,9 @@ export default defineComponent({
             username:'',
             password:'',
             email:'',
-            phoneNo:''
+            phoneNo:'',
+            accType:'',
+            employeeNo:0
         }
     },
     methods:{
@@ -42,14 +53,28 @@ export default defineComponent({
                 this.registerOpen = true;
                 return;
             }
-            await this.$store.dispatch('createAccount',{
-                username:this.username,
-                password:this.password,
-                email:this.email,
-                contact:this.phoneNo,
-                role:'owner'
-            })
-            this.$router.push({name:'Homepage'});
+            console.log(this.accType);
+            if(validateObjects(this.username, this.password, this.email, this.phoneNo, this.accType)){
+                if(this.accType == 'owner' && !validateObjects(this.employeeNo)){
+                    console.error("INPUT INVALID");
+                    return;
+                }
+                await this.$store.dispatch('createAccount',{                    
+                    username:this.username,
+                    password:this.password,
+                    email:this.email,
+                    contact:this.phoneNo,
+                    role:this.accType,
+                    nr_employees:this.employeeNo,
+                    callback:(valid)=>{
+                        if(valid) 
+                            this.$router.push({name:'Homepage'});
+                    }
+                })
+            }
+            else{
+                console.error("INPUT INVALID");
+            }
         }
     }
 })

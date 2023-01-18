@@ -42,7 +42,7 @@ export default defineComponent({
     },
     methods:{
         goBack(){
-            this.$router.push({name:'Homepagemain'});
+            this.$router.push({name:'Homepage'});
         }
     },
     created(){

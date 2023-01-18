@@ -38,12 +38,42 @@ export default new Vuex.Store({
                 if(res.status == 200){
                     commit('setUser', res.data);
                     Vue.$cookies.set('uId', res.data.ID,"24h");
-                    console.log(res.data);
+                    account.callback(true);
                 }
                 else{
                     console.error(res);
                 }
             })
+        },
+        async getUser({commit},id){
+            try{
+                let res = await Api().get(`api/user/getUser/${id}`);
+                if(res.status == 200){
+                    commit('setUser', res.data);
+                }
+                else{
+                    console.error(res.data);
+                }
+            }
+            catch (err){
+                console.log(err);
+            }
+        },
+        async getUserWithCallback({commit},req){
+            try{
+                let res = await Api().get(`api/user/getUser/${req.id}`);
+                if(res.status == 200){
+                    commit('setUser', res.data);
+                    req.callback(res.data);
+                }
+                else{
+                    console.error(res.data);
+                    req.callback(false);
+                }
+            }
+            catch (err){
+                console.log(err);
+            }
         },
         async getSpaces(){
             try{

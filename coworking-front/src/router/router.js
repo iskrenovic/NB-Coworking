@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import store from '@/api-service'
 import Homepage from '@/pages/homepage.vue'
 import LoginRegister from '@/pages/login-register.vue'
 import SpacePage from '@/pages/space-page.vue'
@@ -16,6 +17,13 @@ const r = new Router({
             path:'/',
             name: 'Homepage',
             component: Homepage,
+            beforeEnter(to, from, next){
+                if(!Vue.$cookies.get('uId')){
+                    next({name:'Login'});
+                    return;
+                }
+                next()
+            }
         },
         {
             path:'/login',
@@ -23,7 +31,6 @@ const r = new Router({
             component:LoginRegister,
             beforeEnter(to,from,next){
                 if(!Vue.$cookies.get('uId')){
-                    console.log("USO SAM");
                     next();
                     return;
                 }
@@ -33,7 +40,38 @@ const r = new Router({
         {
             path:'/owner',
             name:'Owner',
-            component:OwnerDash
+            component:OwnerDash,
+            beforeEnter(to, from,next){
+                if(!Vue.$cookies.get('uId')){
+                    next({name:'Login'});
+                    return;
+                }
+                let user = store.getters['getUser'];
+                if(user){
+                    if(user.role == 'owner'){
+                        next();
+                        return;
+                    }
+                    next({name:'Homepage'});
+                    return;
+                }
+                if(!user){
+                    store.dispatch('getUserWithCallback',{
+                        id:Vue.$cookies.get('uId'),
+                        callback:(u)=>{
+                            if(!u){
+                                next({name:'Login'});
+                                return;
+                            }
+                            if(u.role == 'owner'){
+                                next();
+                                return;
+                            }
+                            next({name:'Homepage'});
+                        }
+                    })
+                }               
+            }
         },
         {
             path:'/space/:id',

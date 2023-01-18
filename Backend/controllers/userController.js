@@ -23,11 +23,10 @@ const GetUser = async(req,res) =>{
         let User = await neo4j.model('User').findById(uuid)
         let user = {
             username : User._properties.get("username"),
-            password : User._properties.get("password"),
             ID : User._properties.get("ID"),
             role : User._properties.get("role"),
             email : User._properties.get("email"),
-            contact : User.properties.get("contact")
+            contact : User._properties.get("contact")
         }
         res.status(200).send(user)
     }
