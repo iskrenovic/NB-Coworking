@@ -29,8 +29,8 @@ app.use('/api/place',place);
 app.use('/api/reservation',reservation);
 app.use('/api/room',room);
 app.use('/api/space',space);
-//app.use('/api/login',login); 
-//app.use('/api/register',register)
+app.use('/api/login',login); 
+app.use('/api/register',register)
 //app.use('/api/category',category)
 app.use('/api/user',user);// da ne bi smo mogli da kreiramo praznog usera jer je on kao abstraktna klasa 
 

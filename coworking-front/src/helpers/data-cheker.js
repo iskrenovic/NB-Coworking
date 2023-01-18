@@ -1,8 +1,10 @@
 
 const validateObjects = (...args)=>{
     for(let i = 0;i<args.length;i++){
-        if(!validateArgument(args[i]))
+        if(!validateArgument(args[i])){
+            console.error('INVALID INPUT');
             return false;
+        }
     }
     return true;
 }

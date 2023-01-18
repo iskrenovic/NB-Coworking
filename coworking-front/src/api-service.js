@@ -34,11 +34,35 @@ export default new Vuex.Store({
     },
     actions:{
         async createAccount({commit}, account) {
-            return await Api().post('/api/user/createUser', account).then(res=>{
+            let url = "";
+            switch(account.role){
+                case 'owner':
+                    url = '/api/register/createOwner'
+                    break;
+                case 'business':
+                    url = '/api/register/createBusiness'
+                    break;
+                case 'freelancer':
+                    url = '/api/register/createFreelancer'
+                    break;
+            }
+            return await Api().post(url, account).then(res=>{
                 if(res.status == 200){
                     commit('setUser', res.data);
                     Vue.$cookies.set('uId', res.data.ID,"24h");
                     account.callback(true);
+                }
+                else{
+                    console.error(res);
+                }
+            })
+        },
+        async login({commit}, req){
+            return await Api().post('/api/login/', req.user).then(res=>{
+                if(res.status == 200){
+                    commit('setUser', res.data);
+                    Vue.$cookies.set('uId', res.data.ID,"24h");
+                    req.callback(true);
                 }
                 else{
                     console.error(res);

@@ -29,7 +29,9 @@ const CreateOwner = async (req,res) => {
             }
             res.send(user).status(200)  
 
-        }).catch(err => res.status(400).send(err))
+        }).catch(err => {
+            console.log(err);
+            res.status(400).send(err)})
 
     }).catch(err => res.status(500).send(err))
 }
@@ -72,7 +74,7 @@ const CreateFreelancer = async (req,res) => {
             email: req.body.email,
             contact: req.body.contact,
             name: req.body.name,
-            address: req.body.surname,
+            address: req.body.address,
             password: hash,
             role: "freelancer"
         

@@ -60,7 +60,11 @@ const CreateSpace = async (req,res) => {
             })
             .catch(err => console.log(err))
        
-        res.send(space).status(200)
+        res.send({
+            ID: space._properties.get('ID'),
+            name:space._properties.get('name'),
+            address:space._properties.get('address') 
+        }).status(200)
             
         })        
     .catch(err => res.send(err).status(400));

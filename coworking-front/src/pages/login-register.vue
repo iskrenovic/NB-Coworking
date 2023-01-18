@@ -13,8 +13,14 @@
             <option disabled :value="''">SELECT TYPE OF ACCOUNT</option>
             <option :value="'owner'">Property Owner</option>
             <option :value="'business'">Business</option>
-            <option :value="'user'">Freelancer</option>
+            <option :value="'freelancer'">Freelancer</option>
         </select>
+        <h3 v-if="registerOpen && accType!=''">Name:</h3>
+        <input v-if="registerOpen && accType!=''" type="text" v-model="name"/>
+        <h3 v-if="registerOpen && accType=='owner'">Surname:</h3>
+        <input v-if="registerOpen && accType=='owner'" type="text" v-model="surname"/>
+        <h3 v-if="registerOpen && accType=='freelancer'">Address:</h3>
+        <input v-if="registerOpen && accType=='freelancer'" type="text" v-model="address"/>
         <h3 v-if="registerOpen && accType == 'business'">Number of employees</h3>
         <input v-if="registerOpen && accType == 'business'" type="number" v-model="employeeNo"/>
         <button @click="login">LOGIN</button>
@@ -32,6 +38,9 @@ export default defineComponent({
         return{
             registerOpen: false,
             username:'',
+            name:'',
+            address:'',
+            surname:'',
             password:'',
             email:'',
             phoneNo:'',
@@ -40,41 +49,58 @@ export default defineComponent({
         }
     },
     methods:{
-        login(){
+        async login(){
             if(this.registerOpen){ 
                 this.registerOpen = false;
                 return;
             }
-            
-            console.log(this.username, this.password);
+            if(validateObjects(this.username, this.password)){
+                await this.$store.dispatch('login',{
+                    user:{
+                        username:this.username,
+                        password:this.password
+                    },
+                    callback:(valid)=>{
+                        if(valid)
+                            this.$router.push({name:'Homepage'});
+                    }
+                })            
+            }
         },
         async register(){
             if(!this.registerOpen){
                 this.registerOpen = true;
                 return;
             }
-            console.log(this.accType);
-            if(validateObjects(this.username, this.password, this.email, this.phoneNo, this.accType)){
-                if(this.accType == 'business' && !validateObjects(this.employeeNo)){
-                    console.error("INPUT INVALID");
-                    return;
+            if(validateObjects(this.username, this.password, this.email, this.phoneNo, this.accType, this.name)){
+                switch(this.accType){
+                    case 'owner':
+                        if(!validateObjects(this.surname)) return;
+                        break
+                    case 'freelancer':
+                        if(!validateObjects(this.address)) return;
+                        break
+                    case 'business':
+                        if(!validateObjects(this.employeeNo)) return;
+                        break
                 }
+                
                 await this.$store.dispatch('createAccount',{                    
                     username:this.username,
                     password:this.password,
                     email:this.email,
                     contact:this.phoneNo,
                     role:this.accType,
+                    name:this.name,
+                    surname:this.surname,
+                    address:this.address,
                     nr_employees:this.employeeNo,
                     callback:(valid)=>{
                         if(valid) 
                             this.$router.push({name:'Homepage'});
                     }
                 })
-            }
-            else{
-                console.error("INPUT INVALID");
-            }
+            }            
         }
     }
 })

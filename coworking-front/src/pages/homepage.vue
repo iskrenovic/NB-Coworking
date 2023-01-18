@@ -4,7 +4,7 @@
             <img /> <!--LOGO-->
             <h3 v-if="getUser">Wellcome {{ getUser.username }}</h3>
             <button v-if="isPropertyOwner" @click="openOwnerDashboard">OWNER DASHBOARD</button>
-            <button @click="loginClick">{{(user?'LOGOUT':'LOGIN')}}</button>
+            <button @click="loginClick">{{(getUser?'LOGOUT':'LOGIN')}}</button>
         </div>
         <search-bar pocetnoMesto="Užice" @pronadjeno="searchPronadjen"/>
         <space-list :list="spaces" type="space" />
@@ -35,7 +35,7 @@ export default defineComponent({
         },
         loginClick(){
 
-            if(this.user){
+            if(this.getUser){
                 this.$cookies.remove('uId');
                 
             }            
