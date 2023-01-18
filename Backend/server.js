@@ -10,8 +10,8 @@ const place = require('./routes/place');
 const reservation = require('./routes/reservation');
 const room = require('./routes/room');
 const space = require('./routes/space');
-//const login = require('./routes/login')
-//const register = require('./routes/register')
+const login = require('./routes/login');
+const register = require('./routes/register')
 
 
 

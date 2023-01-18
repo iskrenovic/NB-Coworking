@@ -67,7 +67,7 @@ const CreateUser = async (req,res) => {
 const DeleteUser = async (req,res) => { 
     let userBody = req.body   
     try { 
-        let user = await neo4j.model("User").findById(userBody.ID)
+        let user = await neo4j.model("User").find(userBody.ID)
         if (!user) {
             return res.status(400).send("Object not found.")
         }
@@ -81,7 +81,7 @@ const DeleteUser = async (req,res) => {
 
 const UpdateUser = async (req,res) => { 
     try {
-        let user = await neo4j.model('User').findById(req.params.ID);
+        let user = await neo4j.model('User').find(req.params.ID);
         if (!user) { 
             res.status(400).send("Couldn't find user.");
             return;
@@ -107,7 +107,7 @@ const GetUserBySpaceId = (req,res) => {
 }
 
 /*const AddToSpace = async (req,res) => {
-    let user = await neo4j.model('User').findById(req.body.ID)
+    let user = await neo4j.model('User').find(req.body.ID)
     if (!user) {
         res.status(400).send("User not found!")
         return
