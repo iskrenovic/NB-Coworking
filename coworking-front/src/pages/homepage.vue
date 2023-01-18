@@ -21,6 +21,14 @@ export default defineComponent({
         searchBar,
         SpaceList
     },
+    computed:{
+        getUser(){            
+            return this.$store.getters['getUser'];
+        },
+        isPropertyOwner(){
+            return this.getUser && this.getUser.role == 'owner';
+        }
+    },
     methods:{
         searchPronadjen(mesto, broj, text = "nina"){
             console.log("ovde je", mesto, broj, text);
