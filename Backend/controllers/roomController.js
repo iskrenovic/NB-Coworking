@@ -9,7 +9,8 @@ const RoomsToJSON = (records) =>{
             item.push({
                 ID: field.properties.ID,
                 name:field.properties.name,
-                floor:field.properties.floor      
+                floor:field.properties.floor,
+                size:field.properties.size    
             })
 
         })

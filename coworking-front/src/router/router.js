@@ -81,17 +81,79 @@ const r = new Router({
         {
             path:'/owner/space/:id',
             name:'OwnerSpacePage',
-            component:SpacePage
+            component:SpacePage,
+            beforeEnter(to, from,next){
+                if(!Vue.$cookies.get('uId')){
+                    next({name:'Login'});
+                    return;
+                }
+                let user = store.getters['getUser'];
+                if(user){
+                    if(user.role == 'owner'){
+                        next();
+                        return;
+                    }
+                    next({name:'Homepage'});
+                    return;
+                }
+                if(!user){
+                    store.dispatch('getUserWithCallback',{
+                        id:Vue.$cookies.get('uId'),
+                        callback:(u)=>{
+                            if(!u){
+                                next({name:'Login'});
+                                return;
+                            }
+                            if(u.role == 'owner'){
+                                next();
+                                return;
+                            }
+                            next({name:'Homepage'});
+                        }
+                    })
+                }               
+            }
         },
         {
-            path:'/room/:id',
+            path:'/room/:spaceId/:id',
             name:'RoomPage',
             component:RoomPage
         },
         {
-            path:'/owner/room/:id',
+            path:'/owner/room/:spaceId/:id',
             name:'OwnerRoomPage',
-            component:RoomPage
+            component:RoomPage,
+            beforeEnter(to, from,next){
+                if(!Vue.$cookies.get('uId')){
+                    next({name:'Login'});
+                    return;
+                }
+                let user = store.getters['getUser'];
+                if(user){
+                    if(user.role == 'owner'){
+                        next();
+                        return;
+                    }
+                    next({name:'Homepage'});
+                    return;
+                }
+                if(!user){
+                    store.dispatch('getUserWithCallback',{
+                        id:Vue.$cookies.get('uId'),
+                        callback:(u)=>{
+                            if(!u){
+                                next({name:'Login'});
+                                return;
+                            }
+                            if(u.role == 'owner'){
+                                next();
+                                return;
+                            }
+                            next({name:'Homepage'});
+                        }
+                    })
+                }               
+            }
         }
         
     ],

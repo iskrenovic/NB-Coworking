@@ -40,7 +40,15 @@ export default defineComponent({
     },
     methods:{
         goBack(){
-            this.$router.push({name:'SpacePage'});
+            if(this.owner){
+                this.$router.push({name:'OwnerSpacePage', params:{
+                    id:this.$route.params.spaceId
+                }});
+                return;
+            }
+            this.$router.push({name:'SpacePage', params:{
+                    id:this.$route.params.spaceId
+                }});
         },
         createPotvrdjenu(datum, pocetak, kraj){
             console.log("Potvrdjena rezervacija za datum "+datum + " " + pocetak+"->"+kraj);

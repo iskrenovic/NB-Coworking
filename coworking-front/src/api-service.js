@@ -146,28 +146,34 @@ export default new Vuex.Store({
                 console.log(err);
             }
         },
-        async getRooms(){
+        async getRoomsBySpaceID({commit}, req){
             try{
-                let res = await Api().get(`api/rooms/business/getAllbusinesses/`);
-                console.log(res.data);
+                let res = await Api().get(`api/room/getRoomsBySpaceId/${req.id}`);
+                if(res.status == 200){
+                    commit('setRooms', res.data);
+                    req.callback(res.data);
+                }
+                else{
+                    console.error(res.data);
+                }
             }
             catch (err){
-                console.log(err);
+                console.error(err);
             }
         },
-        async addRoom(commit, room) {
-            return await Api().post('/api/rooms/article/createArticle', room).then(res=>{
+        async addRoom({commit}, room) {
+            return await Api().post('/api/room/createRoom/', room).then(res=>{
                 if(res.status == 200){
-                    commit('setRoom', res.data);
+                    commit('addNewRoom', res.data);
                 }
                 else{
                     console.error(res);
                 }
             })
         },
-        async deleteRoom(commit, id){
+        async deleteRoom({commit}, id){
             try{
-                let res = await Api().delete(`api/rooms/article/deleteArticle/${id}`);
+                let res = await Api().delete(`api/room/deleteRoom/${id}`);
                 if(res.status == 200)
                     commit('removeRoom', id);
                 else
@@ -306,7 +312,7 @@ export default new Vuex.Store({
             state.spaces.push(space);
         },
         removeSpace(state, id){
-            state.spaces = state.spaces.filter(p=>p._id != id);
+            state.spaces = state.spaces.filter(p=>p.ID != id);
         },
 
         setRooms(state, rooms){
@@ -317,7 +323,7 @@ export default new Vuex.Store({
             state.rooms.push(room);
         },
         removeRoom(state, id){
-            state.rooms = state.rooms.filter(p=>p._id != id);
+            state.rooms = state.rooms.filter(p=>p.ID != id);
         },
 
         setEquipment(state, equipment){
@@ -328,7 +334,7 @@ export default new Vuex.Store({
             state.equipment.push(equipment);
         },
         removeEquipment(state, id){
-            state.equipments = state.equipments.filter(p=>p._id != id);
+            state.equipments = state.equipments.filter(p=>p.ID != id);
         },
         setSeats(state, seat){
             state.seats = seat;
@@ -338,13 +344,13 @@ export default new Vuex.Store({
             state.seats.push(seat);
         },
         removeSeat(state, id){
-            state.seats = state.seats.filter(p=>p._id != id);
+            state.seats = state.seats.filter(p=>p.ID != id);
         },
         setRequests(state, requests){
             state.requests = requests;
         },        
         removeRequest(state, id){
-            state.requests = state.requests.filter(p=>p._id != id);
+            state.requests = state.requests.filter(p=>p.ID != id);
         },
     }
 })

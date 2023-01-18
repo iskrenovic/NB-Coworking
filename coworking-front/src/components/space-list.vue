@@ -11,7 +11,7 @@
             </div>
             <div class="space" v-else-if="type == 'rooms'">
                 <h2>{{item.name}}</h2>
-                <h3>{{ item.area }} mkv</h3>
+                <h3>{{ item.size }} mkv</h3>
                 <h3>Sprat: {{ item.floor }}</h3>
                 <h3>Broj mesta:{{ item.seatCount }}</h3>
                 <div class="buttons" v-if="owner">
@@ -61,12 +61,15 @@ export default defineComponent({
     data(){
         return{
             linkName:'',
+            linkParams:{}, 
             linkable:true,
-            clickable:true
+            clickable:true,
+            canClick:true,
         }
     },
     methods:{
         clickToLink(item){
+            if(!this.canClick) return;
             if(!this.clickable){
                 this.clickable = true;
                 return;
@@ -75,9 +78,13 @@ export default defineComponent({
                 this.clickToEmit();
                 return;
             }
-            this.$router.push({name:this.linkName, params:{
-                id:item._id
-            }})
+            let p = {
+                id:item.ID
+            }
+            if(this.type.toUpperCase() == 'ROOMS'){
+                p.spaceId = this.$route.params.id;
+            }
+            this.$router.push({name:this.linkName, params: p})
         },
         clickToEmit(item){
             this.$emit('click', item);
@@ -95,7 +102,7 @@ export default defineComponent({
             switch(this.type.toUpperCase()){
                 case "SPACE": 
                     this.linkName = "SpacePage";  
-                    if(this.owner) this.linkName = "OwnerSpacePage"                  
+                    if(this.owner) this.linkName = "OwnerSpacePage"               
                     return true;                   
                 case "ROOMS":
                     this.linkName = "RoomPage";
@@ -104,7 +111,10 @@ export default defineComponent({
                 case "SEAT":
                     this.linkName = "SeatPage";
                     this.linkable = false;
-                    return true;                
+                    return true;
+                case 'EQUPIMENT':
+                    this.canClick = false;
+                    return true;             
             }  
             return false;
         },
