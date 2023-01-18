@@ -55,7 +55,7 @@ export default defineComponent({
             }
             console.log(this.accType);
             if(validateObjects(this.username, this.password, this.email, this.phoneNo, this.accType)){
-                if(this.accType == 'owner' && !validateObjects(this.employeeNo)){
+                if(this.accType == 'owner' && validateObjects(this.employeeNo)){
                     console.error("INPUT INVALID");
                     return;
                 }

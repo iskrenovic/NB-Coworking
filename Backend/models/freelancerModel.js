@@ -1,10 +1,10 @@
 const  neo4j  = require('../config/neo4j_config');
 
-neo4j.extend('User','Owner',{
+neo4j.extend('User','Freelancer',{
     name: {
         type: 'string',
     },
-    surname: {
+    address: {
         type: 'string',
-    },     
+    },   
 });

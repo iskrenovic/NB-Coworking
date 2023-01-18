@@ -1,5 +1,7 @@
 const neo4j = require('../config/neo4j_config');
 const user = require('../models/userModel');
+const token = require('../config/token');
+const bcrypt = require('bcrypt');
 
 const UsersToJSON = (records) =>{
     let item= []    
