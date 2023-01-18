@@ -8,7 +8,9 @@ const PlacesToJSON = (records) =>{
             console.log(field.properties);
             item.push({
                 ID: field.properties.ID,
-                price :field.properties.price    
+                price: field.properties.price,    
+                description: field.properties.description,
+                name: field.properties.name
             })
 
         })
@@ -22,6 +24,8 @@ const GetPlace = async(req,res) =>{
         let Place = await neo4j.model('Place').find(uuid)
         let place = {
             price : Place._properties.get("price"),
+            description : Place._properties.get("description"),
+            name : Place._properties.get("name"),
             ID : Place._properties.get("ID"),
         }
         res.status(200).send(place)
@@ -35,6 +39,8 @@ const CreatePlace = async (req,res) => {
     const placeBody = req.body    
     await neo4j.model("Place").create({
         price: placeBody.price,
+        name: placeBody.name,
+        description: placeBody.description,
     }).then(async place => {                        
             neo4j.writeCypher(`match (p:Place {ID: "${place._properties.get("ID")}"}),(r:Room {ID: "${req.body.roomID}"}) create (r)-[rel:HASPLACES]->(p) return r,p,rel`)
             .then(result => {
@@ -74,7 +80,8 @@ const UpdatePlace = async (req,res) => {
             return;
         }
         await place.update({
-            price: req.body.price
+            price: req.body.price,
+            description: req.body.description
         });
         res.status(200).send();
     } catch (e) {
