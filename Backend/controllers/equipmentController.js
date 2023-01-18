@@ -1,12 +1,29 @@
 const neo4j = require('../config/neo4j_config');
 const equipment = require('../models/equipmentModel');
 
+const EquipmentToJSON = (records) =>{
+    let item= []
+    records.forEach(element => {
+        element._fields.forEach(field=>{
+            console.log(field.properties);
+            item.push({
+                ID: field.properties.ID,
+                price: field.properties.price,    
+                description: field.properties.description,
+                name: field.properties.name
+            })
+
+        })
+    })
+    return item
+} 
+
 const GetEquipment = async(req,res) =>{
     let uuid = req.params.ID
     try { 
         let Equipment = await neo4j.model('Equipment').find(uuid)
         let equipment = {
-            type : Equipment._properties.get("type"),
+            name : Equipment._properties.get("name"),
             description : Equipment._properties.get("description"),
             ID : Equipment._properties.get("ID"),
             price : Equipment._properties.get("price"),
@@ -18,19 +35,25 @@ const GetEquipment = async(req,res) =>{
     }
 }
 
-const CreateEquipment = (req,res) => {    
+const CreateEquipment = async (req,res) => {    
     const equipmentBody = req.body    
-    neo4j.model("Equipment").create({
+    await neo4j.model("Equipment").create({
         name: equipmentBody.name,
         description: equipmentBody.description,
         price: equipmentBody.price,
-    }).then(equipment => {                        
-            neo4j.cypherWrite(`match (e:Equipment {ID: "${equipment._properties.get("ID")}"}),(u:User {ID: "${req.body.userID}"}) create (u)-[rel:OWNER]->(e) return u,e,rel`)
-            .then(result => {                 
+    }).then(async equipment => {                        
+        neo4j.writeCypher(`match (e:Equipment {ID: "${equipment._properties.get("ID")}"}),(s:Space {ID: "${req.body.spaceID}"}) create (s)-[rel:SPACEHASEQUIP]->(e) return s,e,rel`)
+            .then(result => {
+                console.log(result);                 
             })
             .catch(err => console.log(err))
        
-        res.send(equipment).status(200)
+        res.send({
+            ID: place._properties.get('ID'),
+            price: place._properties.get('price'),
+            name: place._properties.get('name'),
+            description: place._properties.get('description'),
+        }).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
@@ -69,9 +92,20 @@ const UpdateEquipment = async (req,res) => {
     }
 }
 
+const GetEquipmentBySpaceId = (req,res) => {
+    console.log(req.params.ID);
+    neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:SPACEHASEQUIP]->(equipment:Equipment) return equipment`)
+    .then(result => {
+        console.log(result.records);
+        let equipment = EquipmentToJSON(result.records)    
+        res.send(equipment).status(200)
+    }).catch(err => console.log(err))
+}
+
 module.exports = {
     GetEquipment,
     CreateEquipment,
     DeleteEquipment,
-    UpdateEquipment
+    UpdateEquipment,
+    GetEquipmentBySpaceId
 };

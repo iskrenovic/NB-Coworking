@@ -51,6 +51,8 @@ const CreatePlace = async (req,res) => {
         res.send({
             ID: place._properties.get('ID'),
             price: place._properties.get('price'),
+            //name: place._properties.get('name'),
+            //description: place._properties.get('description'),
         }).status(200)
             
         })        
