@@ -10,6 +10,10 @@ neo4j.model('Space', {
     },
     contact:{
         type: 'string'
+    },
+    city:{
+        type: 'string',
+        required: true,
     },   
     ID: {
         primary: true,

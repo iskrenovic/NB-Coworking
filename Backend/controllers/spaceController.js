@@ -3,16 +3,17 @@ const space = require('../models/spaceModel');
 
 const GetSpace = async(req,res) =>{
     let uuid = req.params.ID
-    console.log("ID je:", uuid);    
+    //console.log("ID je:", uuid);    
     try { 
-        console.log("Ja sam ovde i dajem sve od sebe");
+        //console.log("Ja sam ovde i dajem sve od sebe");
         let Space = await neo4j.findById('Space', uuid);
-        console.log("VRACENO JE", Space);
+        //console.log("VRACENO JE", Space);
         let space = {
             name : Space._properties.get("name"), 
             address : Space._properties.get("address"),
             ID : Space._properties.get("ID"),
             contact : Space._properties.get("contact"),
+            city : Space._properties.get("city")
         }
         res.status(200).send(space)
     }
@@ -21,18 +22,26 @@ const GetSpace = async(req,res) =>{
     }
 }
 
+const RecordsToJSON = (records) =>{
+    let item= []    
+    records.forEach(element => {       
+        item.push(element._fields[0].properties)
+    })
+    return item
+} 
+
 const SpacesToJSON = (records) =>{
     let item= []    
     records.forEach(element => {
         let added = false
         item.forEach(e => {
             if (e.section == element._fields[0].properties.category){
-                e.meals.push(element._fields[0].properties)   
+                e.spaces.push(element._fields[0].properties)   
                 added = true    
             }               
         })
         if (added == false)
-            item.push({section:element._fields[0].properties.category,meals:[element._fields[0].properties]})
+            item.push({section:element._fields[0].properties.category,spaces:[element._fields[0].properties]})
     })
     return item
 } 
@@ -43,6 +52,7 @@ const CreateSpace = async (req,res) => {
         name: spaceBody.name,
         address: spaceBody.address,
         contact: spaceBody.contact,
+        city: spaceBody.city,
     }).then(async space => {
             neo4j.writeCypher(`match (s:Space {ID: "${space._properties.get("ID")}"}),(u:User {ID: "${req.body.userID}"}) create (u)-[rel:OWNER]->(s) return u,s,rel`)
             .then(result => { 
@@ -58,7 +68,7 @@ const CreateSpace = async (req,res) => {
 
 const DeleteSpace = async (req,res) => { 
     try { 
-        let result = await neo4j.model('Space').find(req.params.ID);
+        let result = await neo4j.model('Space').findById(req.params.ID);
         if (!result) {
             return res.status(400).send("Object not found.")
         }
@@ -73,7 +83,7 @@ const DeleteSpace = async (req,res) => {
 
 const UpdateSpace = async (req,res) => { 
     try {
-        let space = await neo4j.model('Space').find(req.params.ID);
+        let space = await neo4j.model('Space').findById(req.params.ID);
         if (!space) { 
             res.status(400).send("Couldn't find space.");
             return;
@@ -96,10 +106,17 @@ const GetSpaceByOwnerId = (req,res) => {
     }).catch(err => console.log(err))
 }
 
+const GetSpacesByCity =  async(req,res) => {
+    neo4j.find('Space', {city : req.params.city}).then(space => {
+        res.send(RecordsToJSON(space.records)) 
+    }).catch(err => {console.log(err); return "ERROR!"})
+}
+
 module.exports = {
     GetSpace,
     CreateSpace,
     DeleteSpace,
     UpdateSpace,
-    GetSpaceByOwnerId
+    GetSpaceByOwnerId,
+    GetSpacesByCity
 };

@@ -12,8 +12,8 @@ Space {
     deleteSpace
     updateSpace
     getSpacesByUserId(user_id)
-    getSpacesByRoomsCount(city, employee_count) -> getAvailabeRooms
-    getSpacesByCity(city)
+    ?getSpacesByRoomsCount(city, employee_count) -> getAvailabeRooms
+    ?getSpacesByCity(city)
 }
 
 Room {
