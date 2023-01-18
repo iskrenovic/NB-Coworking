@@ -1,6 +1,22 @@
 const neo4j = require('../config/neo4j_config');
 const room = require('../models/roomModel');
 
+const RoomsToJSON = (records) =>{
+    let item= []
+    records.forEach(element => {
+        element._fields.forEach(field=>{
+            console.log(field.properties);
+            item.push({
+                ID: field.properties.ID,
+                name:field.properties.name,
+                floor:field.properties.floor      
+            })
+
+        })
+    })
+    return item
+} 
+
 const GetRoom = async(req,res) =>{
     let uuid = req.params.ID
     try { 
@@ -18,19 +34,24 @@ const GetRoom = async(req,res) =>{
     }
 }
 
-const CreateRoom = (req,res) => {    
+const CreateRoom = async (req,res) => {    
     const roomBody = req.body    
-    neo4j.model("Room").create({
+    await neo4j.model("Room").create({
         name: roomBody.name,
         floor: roomBody.floor,
         size: roomBody.size,
-    }).then(room => {                        
-            neo4j.cypher(`match (r:Room {ID: "${room._properties.get("ID")}"})`)
-            .then(result => {                 
+    }).then(async room => {                        
+            neo4j.writeCypher(`match (r:Room {ID: "${room._properties.get("ID")}"}),(s:Space {ID: "${req.body.spaceID}"}) create (s)-[rel:HASROOMS]->(r) return s,r,rel`)
+            .then(result => {  
+                console.log(result);               
             })
             .catch(err => console.log(err))
        
-        res.send(room).status(200)
+        res.send({
+            ID: room._properties.get('ID'),
+            name:room._properties.get('name'),
+            floor:room._properties.get('floor'),
+        }).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
@@ -68,9 +89,20 @@ const UpdateRoom = async (req,res) => {
     }
 }
 
+const GetRoomsBySpaceId = (req,res) => {
+    console.log(req.params.ID);
+    neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:HASROOMS]->(room:Room) return room`)
+    .then(result => {
+        console.log(result.records);
+        let rooms = RoomsToJSON(result.records)    
+        res.send(rooms).status(200)
+    }).catch(err => console.log(err))
+}
+
 module.exports = {
     GetRoom,
     CreateRoom,
     DeleteRoom,
-    UpdateRoom
+    UpdateRoom,
+    GetRoomsBySpaceId
 };
