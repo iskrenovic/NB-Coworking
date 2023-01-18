@@ -4,6 +4,10 @@ const neo4j = require('../config/neo4j_config')
 const bcrypt = require('bcrypt')
 const { GetOwnerByUsername,GetBusinessByUsername,GetFreelancerByUsername } = require('../controllers/loginController')
 
+router.get('/get/username/:id',GetOwnerByUsername);
+router.get('/get/username/:id',GetBusinessByUsername);
+router.get('/get/username/:id',GetFreelancerByUsername)
+
 router.post('/', async (req,res)=>{
     try{
     let User = await neo4j.first('User', {username : req.body.username})
