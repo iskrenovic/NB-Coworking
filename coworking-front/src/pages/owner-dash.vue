@@ -105,8 +105,9 @@ export default defineComponent({
                 this.list = list;
             }
         });
-        await this.$store.dispatch('getEquipmentByUserId',this.$cookies.get('uId'));
-        this.equipmentList = this.$store.getters['getEquipment'];
+        //await this.$store.dispatch('getEquipmentByUserId',this.$cookies.get('uId'));
+        //this.equipmentList = this.$store.getters['getEquipment'];
+        if(!this.equipmentList) this.equipmentList = [];
         //@NINA kad ti treba primer za getter-evo ti
     }
 })

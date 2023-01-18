@@ -13,6 +13,10 @@
             <input type="text" v-model="phoneNo"/>
         </div>  
         <div class="seg">
+            <h3>city:</h3>
+            <input type="text" v-model="city"/>
+        </div>
+        <div class="seg">
             <h3>IMAGE:</h3>
             <input type="file" @change="selectImage"/>
         </div>
@@ -32,6 +36,7 @@ export default defineComponent({
             name:'',
             address:'',
             phoneNo:'',
+            city:'',
             image:null
         }
     },
@@ -44,11 +49,12 @@ export default defineComponent({
             return this.name!='' && this.address!='' && this.phoneNo!='' && this.image
         },
         createSpace(){
-            if(validateObjects(this.name, this.address, this.phoneNo, this.image)){
+            if(validateObjects(this.name, this.address, this.phoneNo, this.image, this.city)){
                 this.$store.dispatch('addSpace', {
                     name:this.name,
                     address:this.address,
                     contact: this.phoneNo,
+                    city:this.city,
                     userID:this.$cookies.get('uId')
                 });
                 console.log("VALIDAN INPUT")

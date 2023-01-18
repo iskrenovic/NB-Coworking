@@ -1,6 +1,6 @@
 <template>
     <div class="list">
-        <div v-for="item in list" :key="item._id" @click="clickToLink(item)" class="list-element">
+        <div v-for="item in list" :key="item.ID" @click="clickToLink(item)" class="list-element">
             <img src="@/assets/coworking_example.jpg"/>
             <div class="space" v-if="type == 'equipment'">
                 <h2>{{item.name}}</h2>

@@ -22,7 +22,7 @@ const UsersToJSON = (records) =>{
 const GetUser = async(req,res) =>{
     let uuid = req.params.ID
     try { 
-        let User = await neo4j.model('User').findById(uuid)
+        let User = await neo4j.model('User').find(uuid)
         let user = {
             username : User._properties.get("username"),
             ID : User._properties.get("ID"),
@@ -33,6 +33,7 @@ const GetUser = async(req,res) =>{
         res.status(200).send(user)
     }
     catch(e) { 
+        console.log(e.message);
         res.status(500).end(e.message || e.toString())
     }
 }
@@ -48,11 +49,11 @@ const CreateUser = async (req,res) => {
         contact: userBody.contact
     }).then(async user => {    
             //console.log("Uso sam")      
-            await neo4j.writeCypher(`match (u:User {ID: "${user._properties.get("ID")}"}),(s:Space {ID: "${req.body.spaceID}"}) create (s)-[rel:USESSPACE]->(u) return s,u,rel`)
-            .then(result => { 
-                console.log(result);                
-            })
-            .catch(err => console.log(err))
+            // await neo4j.writeCypher(`match (u:User {ID: "${user._properties.get("ID")}"}),(s:Space {ID: "${req.body.spaceID}"}) create (s)-[rel:USESSPACE]->(u) return s,u,rel`)
+            // .then(result => { 
+            //     console.log(result);                
+            // })
+            // .catch(err => console.log(err))
        
         res.send({
             ID: user._properties.get('ID'),
@@ -99,6 +100,7 @@ const UpdateUser = async (req,res) => {
 const GetUserBySpaceId = (req,res) => {
     neo4j.cypher(`match (space:Space {ID : "${req.params.ID}"})
     -[rel:CONTAINS]->(user:User) return user`).then(result => {
+        
         let users = UsersToJSON(result.records)    
         res.send(users).status(200)
     }).catch(err => console.log(err))
