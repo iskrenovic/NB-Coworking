@@ -35,8 +35,14 @@ export default defineComponent({
         }
     },
     methods:{
-        createEquipment(){
-            console.log("CREATE EQUIPMENT");
+        async createEquipment(){
+            await this.$store.dispatch("addEquipment", {
+                name:this.name,
+                description:this.desc,
+                price:this.price,
+                userID:this.$cookies.get('uId')
+            });
+            //@NINA KAD TI TREBA PRIMER ZA CREATE 
         },
         cancel(){
             this.$emit('cancel');

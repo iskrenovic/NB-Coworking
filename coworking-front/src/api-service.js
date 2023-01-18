@@ -37,7 +37,7 @@ export default new Vuex.Store({
             return await Api().post('/api/user/createUser', account).then(res=>{
                 if(res.status == 200){
                     commit('setUser', res.data);
-                    Vue.$cookies.set('uId', res.data.ID);
+                    Vue.$cookies.set('uId', res.data.ID,"24h");
                     console.log(res.data);
                 }
                 else{
@@ -47,7 +47,7 @@ export default new Vuex.Store({
         },
         async getSpaces(){
             try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
+                let res = await Api().get(`api/space/business/getAllbusinesses/`);
                 console.log(res.data);
             }
             catch (err){
@@ -94,7 +94,7 @@ export default new Vuex.Store({
         },
         async getRooms(){
             try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
+                let res = await Api().get(`api/rooms/business/getAllbusinesses/`);
                 console.log(res.data);
             }
             catch (err){
@@ -102,7 +102,7 @@ export default new Vuex.Store({
             }
         },
         async addRoom(commit, room) {
-            return await Api().post('/api/restaraunt-bar/article/createArticle', room).then(res=>{
+            return await Api().post('/api/rooms/article/createArticle', room).then(res=>{
                 if(res.status == 200){
                     commit('setRoom', res.data);
                 }
@@ -113,7 +113,7 @@ export default new Vuex.Store({
         },
         async deleteRoom(commit, id){
             try{
-                let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);
+                let res = await Api().delete(`api/rooms/article/deleteArticle/${id}`);
                 if(res.status == 200)
                     commit('removeRoom', id);
                 else
@@ -123,9 +123,29 @@ export default new Vuex.Store({
                 console.log(err);
             }  
         },
-        async getEquipment(){
+        async getEquipment({commit}, id){
             try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
+                let res = await Api().get(`api/equipment/getEquipment/${id}`);
+                if(res.status == 200){
+                    commit('setEquipment',res.data);
+                }
+                else{
+                    console.error(res.data);
+                }
+            }
+            catch (err){
+                console.log(err);
+            }
+        },
+        async getEquipmentByUserId({commit}, id){
+            try{
+                let res = await Api().get(`api/equipment/getEquipmentByUserId/${id}`);
+                if(res.status == 200){
+                    commit('setEquipment',res.data);
+                }
+                else{
+                    console.error(res.data);
+                }
                 console.log(res.data);
             }
             catch (err){
@@ -133,9 +153,9 @@ export default new Vuex.Store({
             }
         },
         async addEquipment(commit, equipment) {
-            return await Api().post('/api/restaraunt-bar/article/createArticle', equipment).then(res=>{
+            return await Api().post('/api/equipment/createEquipment/', equipment).then(res=>{
                 if(res.status == 200){
-                    commit('setEquipment', res.data);
+                    commit('addEquipment', res.data);
                 }
                 else{
                     console.error(res);
@@ -144,7 +164,7 @@ export default new Vuex.Store({
         },
         async deleteEquipment(commit, id){
             try{
-                let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);
+                let res = await Api().delete(`api/equipment/article/deleteArticle/${id}`);
                 if(res.status == 200)
                     commit('removeEquipment', id);
                 else
@@ -154,9 +174,12 @@ export default new Vuex.Store({
                 console.log(err);
             }  
         },
-        async getSeats(){
+        async getSeats({commit}, id){
             try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
+                let res = await Api().get(`api/place/getPlace/${id}`);
+                if(res.status==200){
+                commit('setSeats', res.data);
+                }
                 console.log(res.data);
             }
             catch (err){
@@ -214,9 +237,9 @@ export default new Vuex.Store({
             }
             catch (err){
                 console.log(err);
-            }  
+            }
         },
-    },  
+    },
     mutations:{
         setUser(state, user){
             state.user = user;

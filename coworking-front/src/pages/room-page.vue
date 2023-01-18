@@ -51,8 +51,10 @@ export default defineComponent({
         }
     },
     created(){
-        this.owner = this.$route.name == "OwnerRoomPage",
-        this.reserved=false
+        this.owner = this.$route.name == "OwnerRoomPage";
+        this.reserved=false;
+        this.$store.dispatch("getSeats", this.$route.params.id);
+
     }
 })
 </script>

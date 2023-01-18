@@ -103,9 +103,11 @@ export default defineComponent({
             userID:this.$cookies.get('uId'),
             callback:(list)=>{
                 this.list = list;
-                console.log(this.list);
             }
         });
+        await this.$store.dispatch('getEquipmentByUserId',this.$cookies.get('uId'));
+        this.equipmentList = this.$store.getters['getEquipment'];
+        //@NINA kad ti treba primer za getter-evo ti
     }
 })
 </script>

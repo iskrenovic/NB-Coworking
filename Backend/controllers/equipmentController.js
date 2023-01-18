@@ -21,11 +21,11 @@ const GetEquipment = async(req,res) =>{
 const CreateEquipment = (req,res) => {    
     const equipmentBody = req.body    
     neo4j.model("Equipment").create({
-        type: equipmentBody.type,
+        name: equipmentBody.name,
         description: equipmentBody.description,
         price: equipmentBody.price,
     }).then(equipment => {                        
-            neo4j.cypher(`match (e:Equipment {ID: "${equipment._properties.get("ID")}"})`)
+            neo4j.cypherWrite(`match (e:Equipment {ID: "${equipment._properties.get("ID")}"}),(u:User {ID: "${req.body.userID}"}) create (u)-[rel:OWNER]->(e) return u,e,rel`)
             .then(result => {                 
             })
             .catch(err => console.log(err))

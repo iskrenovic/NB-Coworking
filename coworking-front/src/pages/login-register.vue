@@ -49,7 +49,7 @@ export default defineComponent({
                 contact:this.phoneNo,
                 role:'owner'
             })
-            console.log(this.username, this.password, this.email, this.phoneNo);
+            this.$router.push({name:'Homepage'});
         }
     }
 })

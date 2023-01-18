@@ -14,13 +14,21 @@ const r = new Router({
     routes:[
         {
             path:'/',
-            name: 'Homepagemain',
+            name: 'Homepage',
             component: Homepage,
         },
         {
             path:'/login',
             name:'Login',
-            component:LoginRegister
+            component:LoginRegister,
+            beforeEnter(to,from,next){
+                if(!Vue.$cookies.get('uId')){
+                    console.log("USO SAM");
+                    next();
+                    return;
+                }
+                next({name:'Homepage'})
+            }
         },
         {
             path:'/owner',

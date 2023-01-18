@@ -53,7 +53,10 @@ const CreateUser = async (req,res) => {
             })
             .catch(err => console.log(err))
        
-        res.send(user).status(200)
+        res.send({
+            ID: user._properties.get('ID'),
+            name:user._properties.get('name')
+        }).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
