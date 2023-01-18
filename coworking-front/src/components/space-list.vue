@@ -69,6 +69,7 @@ export default defineComponent({
     },
     methods:{
         clickToLink(item){
+            console.log(item);
             if(!this.canClick) return;
             if(!this.clickable){
                 this.clickable = true;

@@ -234,11 +234,11 @@ export default new Vuex.Store({
                 console.log(err);
             }  
         },
-        async getSeats({commit}, id){
+        async getSeatsByRoomId({commit}, id){
             try{
-                let res = await Api().get(`api/place/getPlace/${id}`);
+                let res = await Api().get(`api/place/getPlacesByRoomId/${id}`);
                 if(res.status==200){
-                commit('setSeats', res.data);
+                    commit('setSeats', res.data);
                 }
                 console.log(res.data);
             }
@@ -246,19 +246,19 @@ export default new Vuex.Store({
                 console.log(err);
             }
         },
-        async addSeat(commit, seat) {
-            return await Api().post('/api/restaraunt-bar/article/createArticle', seat).then(res=>{
+        async addSeat({commit}, seat) {
+            return await Api().post('/api/place/createPlace', seat).then(res=>{
                 if(res.status == 200){
-                    commit('setSeat', res.data);
+                    commit('addSeat', res.data);
                 }
                 else{
                     console.error(res);
                 }
             })
         },
-        async deleteSeat(commit, id){
+        async deleteSeat({commit}, id){
             try{
-                let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);
+                let res = await Api().delete(`api/place/article/deleteArticle/${id}`);
                 if(res.status == 200)
                     commit('removeSeat', id);
                 else

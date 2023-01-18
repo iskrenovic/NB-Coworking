@@ -1,7 +1,9 @@
 <template>
     <div>        
-        <reservationForm v-if="reserved" @potvrdjeno="createPotvrdjenu"/>
         <button @click="goBack">Back</button> 
+        <reservationForm v-if="reserved &&!owner" @potvrdjeno="createPotvrdjenu"/>
+        <button v-if="owner && !openFrom" @click="openCreateForm">CREATE ROOM</button>
+        <seat-form v-if="owner && openFrom" @cancel="closeForm"/>
         <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve"/>
     </div>
 </template>
@@ -11,31 +13,20 @@
 import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
 import reservationForm from '@/components/reservationForm.vue';
+import seatForm from '@/components/Owner/seat-form.vue';
 export default defineComponent({
     name:'room-page',
     components:{
     spaceList,
-    reservationForm
+    reservationForm,
+    seatForm
 },
     data(){
         return {
-            list:[{
-                _id:1,
-                name:'Mesto1',
-                price:1200
-            },
-            {
-                _id:2,
-                name:'Mesto2',
-                price:1300
-            },
-            {
-                _id:3,
-                name:'Mesto3',
-                price:1400
-            }],
+            list:[],
             owner:false,
-            reserved:false
+            reserved:false,
+            openFrom:false,
         }
     },
     methods:{
@@ -56,13 +47,20 @@ export default defineComponent({
         crtajReserve(){
             this.reserved=true;
             console.log("crtam rezerve ",this.reserved);
+        },
+        closeForm(){
+            this.openFrom = false;
+        },
+        openCreateForm(){
+            this.openFrom = true;
+            console.log("CLOSE");
         }
     },
-    created(){
+    async created(){
         this.owner = this.$route.name == "OwnerRoomPage";
         this.reserved=false;
-        this.$store.dispatch("getSeats", this.$route.params.id);
-
+        await this.$store.dispatch("getSeatsByRoomId", this.$route.params.id);
+        this.list = this.$store.getters['getSeats'];
     }
 })
 </script>
