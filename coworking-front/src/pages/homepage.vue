@@ -1,8 +1,10 @@
 <template>
-    <div>
+    <div class="ui">
         <div class="top-bar">
             <img /> <!--LOGO-->
-            <button @click="loginClick">{{(isLoggedIn?'PROFILE':'LOGIN')}}</button>
+            <h3 v-if="getUser">Wellcome {{ getUser.username }}</h3>
+            <button v-if="isPropertyOwner" @click="openOwnerDashboard">OWNER DASHBOARD</button>
+            <button @click="loginClick">{{(user?'LOGOUT':'LOGIN')}}</button>
         </div>
         <search-bar pocetnoMesto="Užice" @pronadjeno="searchPronadjen"/>
         <space-list :list="spaces" type="space" />
@@ -24,7 +26,15 @@ export default defineComponent({
             console.log("ovde je", mesto, broj, text);
         },
         loginClick(){
+
+            if(this.user){
+                this.$cookies.remove('uId');
+                
+            }            
             this.$router.push({name:'Login'});
+        },
+        openOwnerDashboard(){
+            this.$router.push({name:'Owner'});
         }
     },
     data(){
@@ -43,13 +53,43 @@ export default defineComponent({
                 _id:3,
                 name:'Coworkingujemo',
                 address:'Znas Ti Znas 420'
-            }]
+            }],
+            user:null
         }
+    },
+    created(){
+        this.user = this.$store.getters['getUser'];
+        console.log(this.user);
     }
 })
 </script>
 
 
 <style scoped>
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f4f4f4;
+}
+
+.top-bar img {
+    width: 50px;
+    height: 50px;
+}
+
+.top-bar h3 {
+    margin: 0;
+    padding-left: 10px;
+}
+
+.top-bar button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
 
 </style>

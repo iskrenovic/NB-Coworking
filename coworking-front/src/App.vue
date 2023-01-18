@@ -8,6 +8,11 @@
 
 export default {
   name: 'App',
+  async created(){
+      if(this.$cookies.get('uId')){
+        await this.$store.dispatch('getUser', this.$cookies.get('uId'));        
+    }
+  }
 }
 </script>
 
