@@ -77,8 +77,9 @@ const CreateReservationAsBusiness = async (req,res) => {
     await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
         dateEnd: reservationBody.dateEnd,
+        status:'pending'
     }).then(async reservation => {                        
-            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.roomID}"}) <-[:HASROOM]-(:Space) <-[:OWNER] - (o:Owner),(b:Business {ID: "${req.body.userID}"}) create (ro)-[rel1:RENTROOM]->(r), (b)-[rel2:BRENT]->(r), (o)-[:RESFOROWNER] return  r,b,ro,rel1,rel2`)
+            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.roomID}"}) <-[:HASROOMS]-(:Space) <-[:OWNER] - (o:Owner),(b:Business {ID: "${req.body.userID}"}) create (ro)-[rel1:RENTROOM]->(r), (b)-[rel2:BRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,b,ro,rel1,rel2`)
             .then(result => {
                 console.log(result);                 
             })
@@ -86,7 +87,9 @@ const CreateReservationAsBusiness = async (req,res) => {
        
         res.send({
             dateStart: reservation._properties.get('dateStart'),
-            dateEnd: reservation._properties.get('dateEnd')
+            dateEnd: reservation._properties.get('dateEnd'),
+            status:reservation._properties.get('status')
+
         }).status(200)
             
         })        
@@ -100,8 +103,7 @@ const CreateReservationAsFreelancer = async (req,res) => {
         dateEnd: reservationBody.dateEnd,
         status:'pending'
     }).then(async reservation => {                                 
-        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"})
-        ,(f:Freelancer {ID: "${req.body.userID}"}), (o:Owner {ID:}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r) return  r,f,p,rel1,rel2`)
+        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r), (o)-[:FRESFOROWNER]->(r) return  r,f,p,rel1,rel2`)
         .then(result => {
                 console.log(result);       
                 res.send({
