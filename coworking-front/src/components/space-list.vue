@@ -55,14 +55,18 @@ export default defineComponent({
             type:Boolean,
             required:false,
             default:false
+        },
+        linkable:{
+            type:Boolean,
+            required:false,
+            default:true
         }
         // @NINA Ovo se poziva kada gleda u listu vlasnik prostora, ako ti nije jasno kako funkcionise ili zasto je tako objasnicu ti kada se budemo videli
     },
     data(){
         return{
             linkName:'',
-            linkParams:{}, 
-            linkable:true,
+            linkParams:{},             
             clickable:true,
             canClick:true,
         }
@@ -110,8 +114,7 @@ export default defineComponent({
                     if(this.owner) this.linkName = "OwnerRoomPage"   
                     return true;
                 case "SEAT":
-                    this.linkName = "SeatPage";
-                    this.linkable = false;
+                    this.linkName = "SeatPage";                    
                     return true;
                 case 'EQUPIMENT':
                     this.canClick = false;

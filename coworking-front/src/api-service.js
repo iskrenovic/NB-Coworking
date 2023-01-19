@@ -300,8 +300,18 @@ export default new Vuex.Store({
                 console.log(err);
             }
         },
-        async addRequest({commit}, request) {
-            return await Api().post('/api/restaraunt-bar/article/createArticle', request).then(res=>{  //TODO
+        async addRequestAsBusiness({commit}, request) {
+            return await Api().post('/api/reservation/createReservationAsBusiness/', request).then(res=>{  //TODO
+                if(res.status == 200){
+                    commit('setRequest', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            })
+        },
+        async addRequestAsFreelancer({commit}, request) {
+            return await Api().post('/api/reservation/createReservationAsFreelancer/', request).then(res=>{  //TODO
                 if(res.status == 200){
                     commit('setRequest', res.data);
                 }

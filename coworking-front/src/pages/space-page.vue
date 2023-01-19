@@ -1,16 +1,17 @@
 <template>
     <div>
-       <button @click="goBack">Back</button> 
+       <button @click="goBack">Back</button>
+       <reservationForm v-if="openReserve &&!owner" @potvrdjeno="createPotvrdjenu"/> 
        <div class="section">
             <button v-if="owner && !openForm" @click="createRoom">CREATE ROOM</button> 
             <room-form v-if="owner && openForm" @cancel="closeForm"/>
-            <space-list :list="list" type="rooms" :owner="owner"/>
+            <space-list :list="list" type="rooms" :owner="owner" />
         </div>
-       <div class="section">
+       <div class="section" v-if="owner">
             <h3>Equipment</h3>
             <equipment-form v-if="openEquipmentForm" @cancel="equipmentCancel"/>
             <button v-else @click="createNewEquipment">CREATE NEW</button>
-            <space-list :list="equipmentList" type="equipment" owner/>
+            <space-list :list="equipmentList" type="equipment" owner !linkable/>
             <!--LISTA EQUIPMENTA-->
         </div>
     </div>

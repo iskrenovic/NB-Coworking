@@ -4,7 +4,7 @@
         <reservationForm v-if="reserved &&!owner" @potvrdjeno="createPotvrdjenu"/>
         <button v-if="owner && !openFrom" @click="openCreateForm">CREATE ROOM</button>
         <seat-form v-if="owner && openFrom" @cancel="closeForm"/>
-        <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve"/>
+        <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve" !linkable/>
     </div>
 </template>
 
