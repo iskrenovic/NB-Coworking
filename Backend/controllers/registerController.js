@@ -3,10 +3,19 @@ const owner = require('../models/ownerModel');
 const business = require('../models/businessModel');
 const freelancer = require('../models/freelancerModel');
 const bcrypt = require('bcrypt');
+//const { GetOwnerByUsername,GetBusinessByUsername,GetFreelancerByUsername } = require('../controllers/loginController')
 const saltRounds = 10;
 
 const CreateOwner = async (req,res) => {  
 
+    /*let ownerExists=GetOwnerByUsername(req.body.username)
+    let businessExists=GetBusinessByUsername(req.body.username)
+    let freelancerExists=GetFreelancerByUsername(req.body.username)
+    if(ownerExists==null)*/
+    if(await usernameTaken(req.body.username)){
+        res.status(409).send("USERNAME TAKEN");
+        return;
+    }
     bcrypt.hash(req.body.password, saltRounds).then(hash => {
 
         neo4j.model("Owner").create({
@@ -37,7 +46,10 @@ const CreateOwner = async (req,res) => {
 }
 
 const CreateBusiness = async (req,res) => {  
-
+    if(await usernameTaken(req.body.username)){
+        res.status(409).send("USERNAME TAKEN");
+        return;
+    }
     bcrypt.hash(req.body.password, saltRounds).then(hash => {
 
         neo4j.model("Business").create({
@@ -66,7 +78,10 @@ const CreateBusiness = async (req,res) => {
 }
 
 const CreateFreelancer = async (req,res) => {  
-
+    if(await usernameTaken(req.body.username)){
+        res.status(409).send("USERNAME TAKEN");
+        return;
+    }
     bcrypt.hash(req.body.password, saltRounds).then(hash => {
 
         neo4j.model("Freelancer").create({
@@ -92,6 +107,11 @@ const CreateFreelancer = async (req,res) => {
         }).catch(err => res.status(400).send(err))
 
     }).catch(err => res.status(500).send(err))
+}
+
+const usernameTaken = async (username, email) => {
+    let resp = await neo4j.cypher(`match (user:User) where user.username = "${username}" OR user.email = "${email}" return user;`);
+    return resp.records.length > 0;
 }
 
 module.exports = {

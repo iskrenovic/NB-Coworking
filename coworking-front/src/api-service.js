@@ -52,10 +52,12 @@ export default new Vuex.Store({
                     commit('setUser', res.data);
                     Vue.$cookies.set('uId', res.data.ID,"24h");
                     account.callback(true);
-                }
+                }                
                 else{
                     console.error(res);
                 }
+            }).catch(err=>{
+                console.error(err);
             })
         },
         async login({commit}, req){
