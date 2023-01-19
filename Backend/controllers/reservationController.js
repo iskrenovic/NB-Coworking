@@ -72,6 +72,14 @@ const GetReservation = async(req,res) =>{
     
 }*/
 
+/*const AcceprReservation = async (req,res) => {
+
+}
+
+const DenyReservation = async (req,res) =>{
+
+}*/
+
 const CreateReservationAsBusiness = async (req,res) => {    
     const reservationBody = req.body    
     await neo4j.model("Reservation").create({
@@ -103,7 +111,7 @@ const CreateReservationAsFreelancer = async (req,res) => {
         dateEnd: reservationBody.dateEnd,
         status:'pending'
     }).then(async reservation => {                                 
-        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r), (o)-[:FRESFOROWNER]->(r) return  r,f,p,rel1,rel2`)
+        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,f,p,rel1,rel2`)
         .then(result => {
                 console.log(result);       
                 res.send({
