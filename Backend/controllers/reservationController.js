@@ -72,14 +72,36 @@ const GetReservation = async(req,res) =>{
     
 }*/
 
-const CreateReservation = async (req,res) => {    
+const CreateReservationAsBusiness = async (req,res) => {    
+    const reservationBody = req.body    
+    await neo4j.model("Reservation").create({
+        dateStart: reservationBody.dateStart,
+        dateEnd: reservationBody.dateEnd,
+    }).then(async reservation => {                        
+            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.roomID}"})
+            ,(b:Business {ID: "${req.body.userID}"}) create (ro)-[rel1:RENTROOM]->(r), (b)-[rel2:BRENT]->(r) return  r,b,ro,rel1,rel2`)
+            .then(result => {
+                console.log(result);                 
+            })
+            .catch(err => console.log(err))
+       
+        res.send({
+            dateStart: reservation._properties.get('dateStart'),
+            dateEnd: reservation._properties.get('dateEnd')
+        }).status(200)
+            
+        })        
+    .catch(err => res.send(err).status(400));
+}
+
+const CreateReservationAsFreelancer = async (req,res) => {    
     const reservationBody = req.body    
     await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
         dateEnd: reservationBody.dateEnd,
     }).then(async reservation => {                        
             neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"})
-            ,(u:User {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:RENT]->(r) return  r,s,p,rel1,rel2`)
+            ,(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r) return  r,f,p,rel1,rel2`)
             .then(result => {
                 console.log(result);                 
             })
@@ -129,7 +151,8 @@ const UpdateReservation = async (req,res) => {
 
 module.exports = {
     GetReservation,
-    CreateReservation,
+    CreateReservationAsBusiness,
+    CreateReservationAsFreelancer,
     DeleteReservation,
     UpdateReservation
 };
