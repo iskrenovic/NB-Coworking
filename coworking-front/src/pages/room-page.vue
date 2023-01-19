@@ -1,7 +1,10 @@
 <template>
-    <div>        
+    <div v-if="loaded">        
         <button @click="goBack">Back</button> 
-        <reservationForm v-if="reserved &&!owner" @potvrdjeno="createPotvrdjenu"/>
+        <reservationForm v-if="reserved &&!owner" 
+        :user="user"
+        :item="selectedSeat"
+        @potvrdjeno="createPotvrdjenu" />
         <button v-if="owner && !openFrom" @click="openCreateForm">CREATE ROOM</button>
         <seat-form v-if="owner && openFrom" @cancel="closeForm"/>
         <space-list :list="list" type="seat" :owner="owner" @click="crtajReserve" :linkable="false"/>
@@ -27,6 +30,9 @@ export default defineComponent({
             owner:false,
             reserved:false,
             openFrom:false,
+            user:null,
+            selectedSeat:null,
+            loaded:false
         }
     },
     methods:{
@@ -41,16 +47,13 @@ export default defineComponent({
                     id:this.$route.params.spaceId
                 }});
         },
-        async createPotvrdjenu(pocetak, kraj){
-            //@DIMI
-            await this.$store.dispatch("addReservation", {
-                dateStart:pocetak,
-                dateEnd:kraj
-            });
-            console.log("Potvrdjena rezervacija za datum "+ " " + pocetak+"->"+kraj);
+        async createPotvrdjenu(){
+            //@NINA
+            
         },
-        crtajReserve(){
+        crtajReserve(item){
             this.reserved=true;
+            this.selectedSeat = item;
             console.log("crtam rezerve ",this.reserved);
         },
         closeForm(){
@@ -64,8 +67,14 @@ export default defineComponent({
     async created(){
         this.owner = this.$route.name == "OwnerRoomPage";
         this.reserved=false;
+        this.user = this.$store.getters['getUser'];
+        if(!this.user){
+            await this.$store.dispatch('getUser', this.$cookies.get('uId'));
+            this.user = this.$store.getters['getUser'];
+        } 
         await this.$store.dispatch("getSeatsByRoomId", this.$route.params.id);
         this.list = this.$store.getters['getSeats'];
+        this.loaded = true;
     }
 })
 </script>

@@ -111,7 +111,7 @@ const CreateReservationAsBusiness = async (req,res) => {
         dateEnd: reservationBody.dateEnd,
         status:'pending'
     }).then(async reservation => {                        
-            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.roomID}"}) <-[:HASROOMS]-(:Space) <-[:OWNER] - (o:Owner),(b:Business {ID: "${req.body.userID}"}) create (ro)-[rel1:RENTROOM]->(r), (b)-[rel2:BRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,b,ro,rel1,rel2`)
+            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.placeID}"}) <-[:HASROOMS]-(:Space) <-[:OWNER] - (o:Owner),(b:Business {ID: "${req.body.userID}"}) create (ro)-[rel1:RENTROOM]->(r), (b)-[rel2:BRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,b,ro,rel1,rel2`)
             .then(result => {
                 console.log(result);                 
             })
@@ -134,8 +134,9 @@ const CreateReservationAsFreelancer = async (req,res) => {
         dateStart: reservationBody.dateStart,
         dateEnd: reservationBody.dateEnd,
         status:'pending'
-    }).then(async reservation => {                                 
-        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,f,p,rel1,rel2`)
+    }).then(async reservation => {    
+                                     
+        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (f)-[rel2:FRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,f,p,rel1,rel2`)
         .then(result => {
                 console.log(result);       
                 res.send({

@@ -12,8 +12,10 @@ router.post('/', async (req,res)=>{
     try{
     let User = await neo4j.first('User', {username : req.body.username})
 
-    if(User == false)
+    if(User == false){
         res.status(404).send('User not found!')
+        return;
+    }
     
     
     bcrypt.compare(req.body.password, User._properties.get("password"), (err, result)  => {
