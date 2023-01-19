@@ -15,6 +15,20 @@ import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
     name:'reservationForm',
+    props:{
+        business:{
+            type:Boolean,
+            required:false,
+            default:false
+        },
+        user:{
+            type:Object,
+            required:true
+        },
+        item:{
+            required:true
+        }
+    },
     data(){
         return {
             pocetakRezervacije:'',
@@ -23,8 +37,18 @@ export default defineComponent({
     },
     //@DIMI izmenila sam ovde parametre da se poklapa sa Najdom (datum pocetka i kraja samo)
     methods:{
-        potvrdi(){
-            this.$emit('potvrdjeno', this.pocetakRezervacije, this.krajRezervacije);
+        async potvrdi(){
+            let link = 'addRequestAsFreelancer'
+            if(this.business){
+                link = 'addRequestAsBusiness';
+            }
+            await this.$store.dispatch(link,{
+                    dateStart: new Date(this.pocetakRezervacije),
+                    dateEnd: new Date(this.krajRezervacije),
+                    userID: this.user.ID,
+                    roomID: this.item.ID
+                })
+            
         },
     },
     created(){

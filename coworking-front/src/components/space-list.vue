@@ -80,7 +80,7 @@ export default defineComponent({
                 return;
             }
             if(!this.linkable) {
-                this.clickToEmit();
+                this.clickToEmit(item);
                 return;
             }
             let p = {
