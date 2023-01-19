@@ -46,15 +46,12 @@ export default defineComponent({
                     dateStart: new Date(this.pocetakRezervacije),
                     dateEnd: new Date(this.krajRezervacije),
                     userID: this.user.ID,
-                    roomID: this.item.ID
-                })
-            
+                    placeID: this.item.ID
+            })
+            //TODO ovde treba da se emituje           
         },
     },
-    created(){
-        console.log("Otvoreno");
-    },
-    emits:['potvrdjeno']
+    emits:['reservationMade']
 })
 </script>
 
