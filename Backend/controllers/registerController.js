@@ -3,10 +3,15 @@ const owner = require('../models/ownerModel');
 const business = require('../models/businessModel');
 const freelancer = require('../models/freelancerModel');
 const bcrypt = require('bcrypt');
+//const { GetOwnerByUsername,GetBusinessByUsername,GetFreelancerByUsername } = require('../controllers/loginController')
 const saltRounds = 10;
 
 const CreateOwner = async (req,res) => {  
 
+    /*let ownerExists=GetOwnerByUsername(req.body.username)
+    let businessExists=GetBusinessByUsername(req.body.username)
+    let freelancerExists=GetFreelancerByUsername(req.body.username)
+    if(ownerExists==null)*/
     bcrypt.hash(req.body.password, saltRounds).then(hash => {
 
         neo4j.model("Owner").create({
