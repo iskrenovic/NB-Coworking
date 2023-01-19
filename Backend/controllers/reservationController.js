@@ -99,6 +99,7 @@ const CreateReservationAsFreelancer = async (req,res) => {
     await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
         dateEnd: reservationBody.dateEnd,
+        status:'pending'
     }).then(async reservation => {                        
             neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"})
             ,(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:FRENT]->(r) return  r,f,p,rel1,rel2`)
@@ -109,7 +110,8 @@ const CreateReservationAsFreelancer = async (req,res) => {
        
         res.send({
             dateStart: reservation._properties.get('dateStart'),
-            dateEnd: reservation._properties.get('dateEnd')
+            dateEnd: reservation._properties.get('dateEnd'),
+            status:reservation._properties.get('status')
         }).status(200)
             
         })        

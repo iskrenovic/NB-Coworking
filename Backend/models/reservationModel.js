@@ -9,6 +9,10 @@ neo4j.model('Reservation',{
         type: 'date',
         required: true
     },
+    status:{
+        type:'string',
+        required:true
+    },
     ID:{
         type: 'uuid',
         unique: true,
