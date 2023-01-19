@@ -1,6 +1,8 @@
 const neo4j = require('../config/neo4j_config');
 const reservation = require('../models/reservationModel');
 //const owner = require('../models/ownerModel');
+//const { GetSpaceByOwnerId } = require('./spaceController');
+//const { GetRoomsBySpaceId } = require('./roomController');
 
 const ReservationsToJSON = (records) =>{
     let item= []
@@ -15,6 +17,14 @@ const ReservationsToJSON = (records) =>{
             })
 
         })
+    })
+    return item
+}
+
+const RecordsToJSON = (records) =>{
+    let item= []    
+    records.forEach(element => {       
+        item.push(element._fields[0].properties)
     })
     return item
 } 
@@ -164,13 +174,23 @@ const GetAcceptedReservationByOwnerId = (req,res) => {
     }).catch(err => console.log(err))
 }
 
-const GetPendingReservationByOwnerId = (req,res) => {
+const GetPendingReservationByOwnerIdRoom = (req,res) => {
     console.log(req.params.ID);
-    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) return r`)
+    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTROOM]->(ro:Room), return r,ro`)
     .then(result => {
         console.log(result.records);
-        let reservations = ReservationsToJSON(result.records)    
-        res.send(reservations).status(200)
+        let reservationsforrooms = RecordsToJSON(result.records)    
+        res.send(reservationsforrooms).status(200)
+    }).catch(err => console.log(err))
+}
+
+const GetPendingReservationByOwnerIdPlace = (req,res) => {
+    console.log(req.params.ID);
+    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTPLACE]->(p:Place), return r,p`)
+    .then(result => {
+        console.log(result.records);
+        let reservationsforplaces = RecordsToJSON(result.records)    
+        res.send(reservationsforplaces).status(200)
     }).catch(err => console.log(err))
 }
 
@@ -182,5 +202,6 @@ module.exports = {
     AcceptReservation,
     DenyReservation,
     GetAcceptedReservationByOwnerId,
-    GetPendingReservationByOwnerId
+    GetPendingReservationByOwnerIdRoom,
+    GetPendingReservationByOwnerIdPlace
 };
