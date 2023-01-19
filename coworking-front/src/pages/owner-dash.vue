@@ -9,14 +9,7 @@
             <space-form v-if="openCreateSpace" @cancel="spaceFormCancel"/>
             <button v-else @click="createNewSpace()">CREATE NEW</button>
             <space-list :list="list" type="space" owner/>
-        </div>
-        <div class="section">
-            <h3>Equipment</h3>
-            <equipment-form v-if="openEquipmentForm" @cancel="equipmentCancel"/>
-            <button v-else @click="createNewEquipment()">CREATE NEW</button>
-            <space-list :list="equipmentList" type="equipment" owner/>
-            <!--LISTA EQUIPMENTA-->
-        </div>
+        </div>        
     </div>
 </template>
 
@@ -25,36 +18,17 @@ import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
 import spaceForm from '@/components/Owner/space-form.vue';
 import requestList from '@/components/Owner/request-list.vue';
-import equipmentForm from '@/components/Owner/equipment-form.vue';
 export default defineComponent({
     name:'owner-dash',
     components:{
         spaceList,
         spaceForm,
         requestList,
-        equipmentForm
+        
     },
     data(){
         return{
-            list:[],
-            equipmentList:[{
-                _id:1,
-                name:'Macbook',
-                desc:'jAbuka',
-                price:350
-            },
-            {
-                _id:2,
-                name:'Stampac',
-                desc:'Laserjet',
-                price:350
-            },
-            {
-                _id:3,
-                name:'Kozna stolica',
-                desc:'Udobna',
-                price:350
-            }],
+            list:[],            
             requests:[{
                 _id:1,
                 startTime: new Date(),
@@ -105,10 +79,7 @@ export default defineComponent({
                 this.list = list;
             }
         });
-        //await this.$store.dispatch('getEquipmentByUserId',this.$cookies.get('uId'));
-        //this.equipmentList = this.$store.getters['getEquipment'];
-        if(!this.equipmentList) this.equipmentList = [];
-        //@NINA kad ti treba primer za getter-evo ti
+        
     }
 })
 </script>

@@ -4,7 +4,7 @@
             <img src="@/assets/coworking_example.jpg"/>
             <div class="space" v-if="type == 'equipment'">
                 <h2>{{item.name}}</h2>
-                <h3>{{ item.desc }} - <b>{{ item.price }} RSD</b></h3>
+                <h3>{{ item.description }} - <b>{{ item.price }} RSD</b></h3>
                 <div class="buttons" v-if="owner">
                     <button @click="deleteItem(item)">DELETE</button>
                 </div>

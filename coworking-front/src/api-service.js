@@ -114,7 +114,7 @@ export default new Vuex.Store({
         //@DIMI
         async getSpacesByCity({commit}, city){
             try{
-                let res = await Api().get('api/space/getSpacesByCity/${city}');
+                let res = await Api().get(`api/space/getSpacesByCity/${city}`);
                 if(res.status==200){
                 commit('setSpaces', res.data);
                 }
@@ -217,7 +217,7 @@ export default new Vuex.Store({
         },
         async getEquipmentByUserId({commit}, id){
             try{
-                let res = await Api().get(`api/equipment/getEquipmentByUserId/${id}`);
+                let res = await Api().get(`api/equipment/getEquipmentBySpaceId/${id}`);
                 if(res.status == 200){
                     commit('setEquipment',res.data);
                 }
@@ -286,7 +286,7 @@ export default new Vuex.Store({
                 console.log(err);
             }  
         },
-        async getRequests(){
+        async getRequests({commit},){
             try{
                 let res = await Api().get(`api/qsoft/business/getAllbusinesses/`); //TODO 
                 if(res.status == 200){
@@ -300,7 +300,7 @@ export default new Vuex.Store({
                 console.log(err);
             }
         },
-        async addRequest(commit, request) {
+        async addRequest({commit}, request) {
             return await Api().post('/api/restaraunt-bar/article/createArticle', request).then(res=>{  //TODO
                 if(res.status == 200){
                     commit('setRequest', res.data);
@@ -310,7 +310,7 @@ export default new Vuex.Store({
                 }
             })
         },
-        async deleteRequest(commit, id){
+        async deleteRequest({commit}, id){
             try{
                 let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);  //TODO
                 if(res.status == 200)
@@ -323,7 +323,7 @@ export default new Vuex.Store({
             }
         },
         //@DIMI
-        async addReservation(commit, reservation) {
+        async addReservation({commit}, reservation) {
             return await Api().post('/api/reservation/createReservation', reservation).then(res=>{
                 if(res.status == 200){
                     commit('setReservations', res.data);
@@ -383,7 +383,7 @@ export default new Vuex.Store({
         },
         setRequests(state, requests){
             if(!requests) state.requests=[]
-            state.requests,push(requests); 
+            state.requests.push(requests); 
         },        
         removeRequest(state, id){
             state.requests = state.requests.filter(p=>p.ID != id);

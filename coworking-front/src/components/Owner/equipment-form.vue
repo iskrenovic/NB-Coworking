@@ -31,7 +31,7 @@ export default defineComponent({
             name:'',
             desc:'',
             price:'',
-            selectImage:null
+            image:null
         }
     },
     methods:{
@@ -40,10 +40,15 @@ export default defineComponent({
                 name:this.name,
                 description:this.desc,
                 price:this.price,
-                userID:this.$cookies.get('uId')
+                userID:this.$cookies.get('uId'),
+                spaceID:this.$route.params.id
             });
             //@NINA KAD TI TREBA PRIMER ZA CREATE 
         },
+        selectImage(img){
+            console.log("Selected image is:", img);
+            this.image = img;
+        }, 
         cancel(){
             this.$emit('cancel');
         }
