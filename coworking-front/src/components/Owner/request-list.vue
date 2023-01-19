@@ -1,10 +1,9 @@
 <template>
     <div class="list">
         <div v-for="req in requests" :key="req._id" class="element">
-            <!--FALI JOS INFORMACIJA-->
             <h3>Room X Place Y</h3>
-            <h3>Start time: {{req.startTime}}</h3>
-            <h3>End time: {{req.endTime}}</h3>
+            <h3>Start time: {{req.dateStart.toDateString()}}</h3>
+            <h3>End time: {{req.dateEnd.toDateString()}}</h3>
             <div class="buttons">
                 <button @click="accept(req)">Accept</button>
                 <button @click="deny(req)">Deny</button>
@@ -25,15 +24,15 @@ export default defineComponent({
         }
     },
     methods:{
-        accept(req){
-          //TODOAPI
-            console.log("ACCEPT REQ:", req);
+        async accept(req){
+            await this.$store.dispatch('acceptRequest', req.ID);
         },
-        deny(req){
-          //TODOAPI
+        async deny(req){
+            await this.$store.dispatch('denyRequest', req.ID);
             console.log("DENY REQ:", req);
         }
     }
+    
 
 })
 </script>

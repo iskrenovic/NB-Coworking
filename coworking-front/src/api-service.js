@@ -11,7 +11,8 @@ export default new Vuex.Store({
         seats:null,
         equipment:null,
         requests:null,
-        reservations:null
+        acceptedRequests:null,
+        request:null
     },
     getters:{
         getSpaces(state){
@@ -28,6 +29,9 @@ export default new Vuex.Store({
         },
         getRequests(state){
             return state.requests;
+        },
+        getAcceptedRequests(state){
+            return state.acceptedRequests;
         },
         getUser(state){
             return state.user;
@@ -286,11 +290,12 @@ export default new Vuex.Store({
                 console.log(err);
             }  
         },
-        async getRequests({commit},){
+        async getPendingRequests({commit},id){
             try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`); //TODO 
+                let res = await Api().get(`api/reservation/getPendingReservationByOwnerId/${id}`); 
                 if(res.status == 200){
-                    commit('setRequest', res.data);
+                    console.log("STIGLO", res.data);
+                    commit('setRequests', res.data);
                 }
                 else{
                     console.error(res);
@@ -299,6 +304,42 @@ export default new Vuex.Store({
             catch (err){
                 console.log(err);
             }
+        },
+        async getAcceptedRequests({commit},id){
+            try{
+                let res = await Api().get(`api/reservation/getAcceptedReservationByOwnerId/${id}`); 
+                if(res.status == 200){
+                    console.log("STIGLO", res.data);
+                    commit('setAcceptedRequests', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            }
+            catch (err){
+                console.log(err);
+            }
+        },
+        async acceptRequest({commit}, id) {
+            return await Api().put(`/api/reservation/acceptReservation/${id}`).then(res=>{  
+                if(res.status == 200){
+                    commit('removeRequest', id);
+                    //commit('setRequest', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            })
+        },
+        async denyRequest({commit}, id) {
+            return await Api().put(`/api/reservation/denyReservation/${id}`).then(res=>{  
+                if(res.status == 200){
+                    commit('removeRequest', id);
+                }
+                else{
+                    console.error(res);
+                }
+            })
         },
         async addRequestAsBusiness({commit}, request) {
             return await Api().post('/api/reservation/createReservationAsBusiness/', request).then(res=>{  //TODO
@@ -392,9 +433,32 @@ export default new Vuex.Store({
             state.seats = state.seats.filter(p=>p.ID != id);
         },
         setRequests(state, requests){
-            if(!requests) state.requests=[]
-            state.requests.push(requests); 
-        },        
+            state.requests = [];
+            requests.forEach(r=>{
+                console.log(r.dateStart);
+                new Date()
+                state.requests.push({
+                    ID:r.ID,
+                    dateStart: new Date(r.dateStart.year.low,r.dateStart.month.low, r.dateStart.day.low,0,0,0,0),
+                    dateEnd: new Date(r.dateEnd.year.low,r.dateEnd.month.low, r.dateEnd.day.low,0,0,0,0)
+                });
+            })
+        }, 
+        setAcceptedRequests(state, requests){
+            state.acceptedRequests = [];
+            requests.forEach(r=>{
+                console.log(r.dateStart);
+                new Date()
+                state.acceptedRequests.push({
+                    ID:r.ID,
+                    dateStart: new Date(r.dateStart.year.low,r.dateStart.month.low, r.dateStart.day.low,0,0,0,0),
+                    dateEnd: new Date(r.dateEnd.year.low,r.dateEnd.month.low, r.dateEnd.day.low,0,0,0,0)
+                });
+            })
+        },         
+        setRequest(state, request){
+            state.request = request; 
+        },  
         removeRequest(state, id){
             state.requests = state.requests.filter(p=>p.ID != id);
         },

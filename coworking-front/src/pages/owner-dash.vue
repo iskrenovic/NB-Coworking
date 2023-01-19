@@ -1,8 +1,14 @@
 <template>
     <div class="ui">
-        <div class="section">
-            <h3>Requests</h3>   
-            <request-list :requests="requests"/>
+        <div class="section" v-if="getPendingRequests">
+            <h3>Requests</h3>
+            <h3 v-if="getPendingRequests.length==0">EMPTY</h3>
+            <request-list :requests="getPendingRequests"/>
+        </div>
+        <div class="section" v-if="getAcceptedRequests">
+            <h3>Today inside:</h3>   
+            <h3 v-if="getAcceptedRequests.length==0">EMPTY</h3>
+            <request-list :requests="getAcceptedRequests"/>
         </div>
         <div class="section">
             <h3>Spaces</h3>
@@ -29,33 +35,20 @@ export default defineComponent({
     data(){
         return{
             list:[],            
-            requests:[{
-                _id:1,
-                startTime: new Date(),
-                endTime: new Date(new Date().setDate(new Date().getDate() + 2))
-            },
-            {
-                _id:2,
-                startTime: new Date(),
-                endTime: new Date(new Date().setDate(new Date().getDate() + 3))
-            },
-            {
-                _id:3,
-                startTime: new Date(),
-                endTime: new Date(new Date().setDate(new Date().getDate() + 5))
-            },
-            {
-                _id:4,
-                startTime: new Date(),
-                endTime: new Date(new Date().setDate(new Date().getDate() + 5))
-            },
-            {
-                _id:5,
-                startTime: new Date(),
-                endTime: new Date(new Date().setDate(new Date().getDate() + 5))
-            }],
+            requests:[],
             openCreateSpace:false,
-            openEquipmentForm: false
+            openEquipmentForm: false,
+        }
+    },
+    computed:{
+        getPendingRequests(){
+            return this.$store.getters['getRequests'];
+        },
+        getAcceptedRequests(){
+            let r = this.$store.getters['getAcceptedRequests'];
+            if(!r) return null;
+            let today = (new Date()).toDateString();
+            return r.filter(p=>p.dateStart.toDateString() == today);
         }
     },
     methods:{
@@ -79,7 +72,9 @@ export default defineComponent({
                 this.list = list;
             }
         });
-        
+        await this.$store.dispatch('getPendingRequests', this.$cookies.get('uId'));
+        await this.$store.dispatch('getAcceptedRequests', this.$cookies.get('uId'));
+
     }
 })
 </script>
