@@ -26,9 +26,11 @@ export default defineComponent({
     },
     methods:{
         accept(req){
+          //TODOAPI
             console.log("ACCEPT REQ:", req);
         },
         deny(req){
+          //TODOAPI
             console.log("DENY REQ:", req);
         }
     }

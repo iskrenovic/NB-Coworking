@@ -48,6 +48,7 @@ export default defineComponent({
         inputValid(){
             return this.name!='' && this.address!='' && this.phoneNo!='' && this.image
         },
+        //@DIMI
         createSpace(){
             if(validateObjects(this.name, this.address, this.phoneNo, this.image, this.city)){
                 this.$store.dispatch('addSpace', {

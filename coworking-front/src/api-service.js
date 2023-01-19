@@ -11,6 +11,7 @@ export default new Vuex.Store({
         seats:null,
         equipment:null,
         requests:null,
+        reservations:null
     },
     getters:{
         getSpaces(state){
@@ -105,6 +106,21 @@ export default new Vuex.Store({
                 console.log(res.data);
             }
             catch (err){
+                console.log(err);
+            }
+        },
+        //@DIMI
+        async getSpacesByCity({commit}, city){
+            try{
+                let res = await Api().get('api/space/getSpacesByCity/${city}');
+                if(res.status==200){
+                commit('setSpaces', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            }
+            catch(err){
                 console.log(err);
             }
         },
@@ -270,15 +286,20 @@ export default new Vuex.Store({
         },
         async getRequests(){
             try{
-                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`);
-                console.log(res.data);
+                let res = await Api().get(`api/qsoft/business/getAllbusinesses/`); //TODO 
+                if(res.status == 200){
+                    commit('setRequest', res.data);
+                }
+                else{
+                    console.error(res);
+                }
             }
             catch (err){
                 console.log(err);
             }
         },
         async addRequest(commit, request) {
-            return await Api().post('/api/restaraunt-bar/article/createArticle', request).then(res=>{
+            return await Api().post('/api/restaraunt-bar/article/createArticle', request).then(res=>{  //TODO
                 if(res.status == 200){
                     commit('setRequest', res.data);
                 }
@@ -289,7 +310,7 @@ export default new Vuex.Store({
         },
         async deleteRequest(commit, id){
             try{
-                let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);
+                let res = await Api().delete(`api/restaraunt-bar/article/deleteArticle/${id}`);  //TODO
                 if(res.status == 200)
                     commit('removeRequest', id);
                 else
@@ -299,6 +320,18 @@ export default new Vuex.Store({
                 console.log(err);
             }
         },
+        //@DIMI
+        async addReservation(commit, reservation) {
+            return await Api().post('/api/reservation/createReservation', reservation).then(res=>{
+                if(res.status == 200){
+                    commit('setReservations', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            })
+        },
+        
     },
     mutations:{
         setUser(state, user){
@@ -347,10 +380,16 @@ export default new Vuex.Store({
             state.seats = state.seats.filter(p=>p.ID != id);
         },
         setRequests(state, requests){
-            state.requests = requests;
+            if(!requests) state.requests=[]
+            state.requests,push(requests); 
         },        
         removeRequest(state, id){
             state.requests = state.requests.filter(p=>p.ID != id);
         },
+        //@DIMI
+        setReservations(state, reservations){
+            if(!state.reservations) state.reservations=[]
+            state.reservations.push(reservations);
+        },       
     }
 })

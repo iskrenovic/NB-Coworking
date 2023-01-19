@@ -30,8 +30,11 @@ export default defineComponent({
         }
     },
     methods:{
-        searchPronadjen(mesto, broj, text = "nina"){
-            console.log("ovde je", mesto, broj, text);
+        //@DIMI
+        async searchPronadjen(mesto, broj){
+            await this.$store.dispatch('getSpacesByCity', mesto);
+            this.spaces= this.$store.getters['getSpaces'];
+            console.log(mesto, broj);
         },
         loginClick(){
 

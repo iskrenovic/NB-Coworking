@@ -1,12 +1,10 @@
 <template>
     <div class="reservation-form">
         <h3>Rezervacija mesta</h3>
-        <h2>Datum:</h2>
-        <input type="date" v-model="datumRezervacije"/>
         <h2>Pocetak rezervacije:</h2>
-        <input type="time" v-model="pocetakRezervacije"/>
+        <input type="date" v-model="pocetakRezervacije"/>
         <h2>Kraj rezervacije:</h2>
-        <input type="time" v-model="krajRezervacije"/>
+        <input type="date" v-model="krajRezervacije"/>
         <button @click="potvrdi">Potvrdi</button>
     </div>
 </template>
@@ -19,14 +17,14 @@ export default defineComponent({
     name:'reservationForm',
     data(){
         return {
-            datumRezervacije:'',
             pocetakRezervacije:'',
             krajRezervacije:''
         }
     },
+    //@DIMI izmenila sam ovde parametre da se poklapa sa Najdom (datum pocetka i kraja samo)
     methods:{
         potvrdi(){
-            this.$emit('potvrdjeno', this.datumRezervacije,this.pocetakRezervacije, this.krajRezervacije);
+            this.$emit('potvrdjeno', this.pocetakRezervacije, this.krajRezervacije);
         },
     },
     created(){

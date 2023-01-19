@@ -41,8 +41,13 @@ export default defineComponent({
                     id:this.$route.params.spaceId
                 }});
         },
-        createPotvrdjenu(datum, pocetak, kraj){
-            console.log("Potvrdjena rezervacija za datum "+datum + " " + pocetak+"->"+kraj);
+        async createPotvrdjenu(pocetak, kraj){
+            //@DIMI
+            await this.$store.dispatch("addReservation", {
+                dateStart:pocetak,
+                dateEnd:kraj
+            });
+            console.log("Potvrdjena rezervacija za datum "+ " " + pocetak+"->"+kraj);
         },
         crtajReserve(){
             this.reserved=true;
