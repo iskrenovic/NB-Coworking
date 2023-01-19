@@ -1,6 +1,24 @@
 const neo4j = require('../config/neo4j_config');
 const reservation = require('../models/reservationModel');
+const owner = require('../models/ownerModel');
 //const {RecordsToJSON,NodeTOString, NodeToJson} = require('../helpers')
+
+const ReservationsToJSON = (records) =>{
+    let item= []
+    records.forEach(element => {
+        element._fields.forEach(field=>{
+            console.log(field.properties);
+            item.push({
+                ID: field.properties.ID,
+                dateStart:field.properties.dateStart,
+                dateEnd:field.properties.dateEnd,
+                status:field.properties.status      
+            })
+
+        })
+    })
+    return item
+} 
 
 const GetReservation = async(req,res) =>{
     let uuid = req.params.ID
@@ -73,7 +91,13 @@ const GetReservation = async(req,res) =>{
 }*/
 
 /*const AcceprReservation = async (req,res) => {
-
+    let uuid = req.params.ID
+    try { 
+        let Owner = await neo4j.model('Owner').find(uuid)
+    }
+    catch(e) { 
+        res.status(500).end(e.message || e.toString())
+    }
 }
 
 const DenyReservation = async (req,res) =>{
@@ -158,6 +182,16 @@ const UpdateReservation = async (req,res) => {
         console.log(e);
         res.status(500).send(e);
     }
+}
+
+const GetReservationByOwnerId = (req,res) => {
+    console.log(req.params.ID);
+    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:OWNER]->(r:Reservation) return r`)
+    .then(result => {
+        console.log(result.records);
+        let reservations = ReservationsToJSON(result.records)    
+        res.send(reservations).status(200)
+    }).catch(err => console.log(err))
 }
 
 module.exports = {
