@@ -72,18 +72,23 @@ const GetReservation = async(req,res) =>{
     
 }*/
 
-const CreateReservation = (req,res) => {    
+const CreateReservation = async (req,res) => {    
     const reservationBody = req.body    
-    neo4j.model("Reservation").create({
+    await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
         dateEnd: reservationBody.dateEnd,
-    }).then(reservation => {                        
-            neo4j.cypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"})`)
-            .then(result => {                 
+    }).then(async reservation => {                        
+            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"})
+            ,(u:User {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (u)-[rel2:RENT]->(r) return  r,s,p,rel1,rel2`)
+            .then(result => {
+                console.log(result);                 
             })
             .catch(err => console.log(err))
        
-        res.send(reservation).status(200)
+        res.send({
+            dateStart: reservation._properties.get('dateStart'),
+            dateEnd: reservation._properties.get('dateEnd')
+        }).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
