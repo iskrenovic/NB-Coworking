@@ -1,5 +1,6 @@
 const neo4j = require('../config/neo4j_config');
 const equipment = require('../models/equipmentModel');
+//const { GetSpaceByOwnerId } = require('./spaceController');
 
 const EquipmentToJSON = (records) =>{
     let item= []
@@ -101,6 +102,11 @@ const GetEquipmentBySpaceId = (req,res) => {
         res.send(equipment).status(200)
     }).catch(err => console.log(err))
 }
+
+/*const GetEquipmentByOwnerId = (req,res) => {
+    let spaces = GetSpaceByOwnerId(req.params.ID)
+    let equipment= GetEquipmentBySpaceId(spaces._properties.ID)
+}*/
 
 module.exports = {
     GetEquipment,

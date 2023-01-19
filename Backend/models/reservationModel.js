@@ -2,11 +2,11 @@ const neo4j = require('../config/neo4j_config');
 
 neo4j.model('Reservation',{
     dateStart: {
-        type: 'number',
+        type: 'date',
         required: true                
     },
     dateEnd: {
-        type: 'number',
+        type: 'date',
         required: true
     },
     ID:{

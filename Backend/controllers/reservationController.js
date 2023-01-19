@@ -1,5 +1,6 @@
 const neo4j = require('../config/neo4j_config');
 const reservation = require('../models/reservationModel');
+//const {RecordsToJSON,NodeTOString, NodeToJson} = require('../helpers')
 
 const GetReservation = async(req,res) =>{
     let uuid = req.params.ID
@@ -16,6 +17,60 @@ const GetReservation = async(req,res) =>{
         res.status(500).end(e.message || e.toString())
     }
 }
+
+
+/*const CreateReservation = async (req,res) => {
+    let price = 0
+    try { 
+
+        for await (let element of req.body.places) {
+            price += await GetPlacePrice(element)
+        }
+        let reservation = await neo4j.model("Reservation").create({
+            dateStart: req.body.dateStart,
+            dateEnd: req.body.dateEnd,
+        });
+        let reservationJson = NodeToJson(reservation);
+
+        let relationResult = await neo4j.writeCypher(
+            `match (b:Business {ID: "${req.body.ID}"}),
+                    (r:Reservation {reservationID: "${reservation._properties.get('reservationID')}"})
+                    create (b)-[rel:RESERVED]->(r) return rel`);
+    
+        if (relationResult.records.length < 1) {
+            throw new  Error("Couldn't create relation");
+        }
+        let allPlaces = [];
+        for await (let ID of req.body.places) { 
+            let placeResult = await neo4j.cypher(
+                `match (r:Reservation {reservationID : "${reservation._properties.get("reservationID")}"}),
+                (p:Place  {ID: "${ID}"}) 
+                create (r)-[rel:RESERVEPLACE]->(p) return p`);
+            let placeJson = RecordsToJSON(placeResult.records);
+            placeJson.forEach(element => {
+                allPlaces.push(element);
+            });
+            
+        }
+        let porukaSpace = { 
+            messageType: "NewReservation",
+            reservation : reservationJson,
+            ID: req.body.ID,
+            places: allPlaces
+        }
+        await redis_client.publish("app:space",JSON.stringify(porukaSpace));
+        //ili ovako, da u redisu pamtimo samo  orderedok se ne izvrse ali ne cele objekte, vec njihov id i status 
+        await redis_client.sAdd('reservations:pending',`'${reservationJson.reservationID}'`);
+        // redis_client.hSet('ordersPending',`${orderJson.orderID}`,JSON.stringify(poruka));
+        await redis_client.expire('reservations:pending',24*60*60); //problem, hocu da se kes izbrise u 11:59 uvece
+        res.status(200).end();
+    }
+    catch(e) { 
+        res.status(500).send(e);
+        console.log(e);
+    }
+    
+}*/
 
 const CreateReservation = (req,res) => {    
     const reservationBody = req.body    
