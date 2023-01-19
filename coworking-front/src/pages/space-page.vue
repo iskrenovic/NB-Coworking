@@ -1,17 +1,21 @@
 <template>
-    <div>
+    <div v-if="loaded">
        <button @click="goBack">Back</button>
-       <reservationForm v-if="openReserve &&!owner" @potvrdjeno="createPotvrdjenu"/> 
+       <reservationForm v-if="openReserve && user.role.toLowerCase() == 'business'"
+       business
+       :user="user"
+       :item="selectedRoom"
+       @potvrdjeno="createReservation"/> 
        <div class="section">
             <button v-if="owner && !openForm" @click="createRoom">CREATE ROOM</button> 
             <room-form v-if="owner && openForm" @cancel="closeForm"/>
-            <space-list :list="list" type="rooms" :owner="owner" />
+            <space-list :list="list" type="rooms" :owner="owner" :linkable="user.role.toLowerCase() != 'business'" @click="selectRoom"/>
         </div>
        <div class="section" v-if="owner">
             <h3>Equipment</h3>
             <equipment-form v-if="openEquipmentForm" @cancel="equipmentCancel"/>
             <button v-else @click="createNewEquipment">CREATE NEW</button>
-            <space-list :list="equipmentList" type="equipment" owner !linkable/>
+            <space-list :list="equipmentList" type="equipment" owner :linkable="false"/>
             <!--LISTA EQUIPMENTA-->
         </div>
     </div>
@@ -23,20 +27,26 @@ import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
 import roomForm from '@/components/Owner/room-form.vue';
 import equipmentForm from '@/components/Owner/equipment-form.vue';
+import reservationForm from '@/components/reservationForm.vue';
 export default defineComponent({
     name:'space-page',
     components:{
         spaceList,
         roomForm,
-        equipmentForm
+        equipmentForm,
+        reservationForm
     },
     data(){
         return {
             list:[],
             owner:false,
+            user:null,
+            selectedRoom:null,
             openForm:false,
+            openReserve:false,
             equipmentList:[],
-            openEquipmentForm:false
+            openEquipmentForm:false,
+            loaded:false,
         }
     },
     methods:{
@@ -58,6 +68,13 @@ export default defineComponent({
         },
         equipmentCancel(){
             this.openEquipmentForm = false;
+        },
+        selectRoom(room){
+            this.selectedRoom = room;
+            this.openReserve = true;
+        },
+        createReservation(){
+
         }
         
     },
@@ -69,9 +86,15 @@ export default defineComponent({
                 this.list = resp;
             }
         })
+        this.user = this.$store.getters['getUser'];
+        if(!this.user){
+            await this.$store.dispatch('getUser', this.$cookies.get('uId'));
+            this.user = this.$store.getters['getUser'];
+        } 
         await this.$store.dispatch('getEquipmentByUserId',this.$route.params.id);
         this.equipmentList = this.$store.getters['getEquipment'];
         if(!this.equipmentList) this.equipmentList = [];
+        this.loaded = true;
         //@NINA kad ti treba primer za getter-evo ti
     }
 })
