@@ -9,8 +9,11 @@ neo4j.model('Room',{
         type: 'string'
     },  
     size: {
-        type: 'number',
-    },  
+        type: 'number'
+    },
+    price:{
+        type:'number'
+    },
     ID: {
         primary: true,
         unique: true,

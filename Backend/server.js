@@ -13,16 +13,12 @@ const space = require('./routes/space');
 const login = require('./routes/login');
 const register = require('./routes/register')
 
-
-
 neo4j.withDirectory(__dirname + '/models')
-
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({extended : false}));
 app.use(cors());
-
 
 app.use('/api/equipment',equipment);
 app.use('/api/place',place);
@@ -33,8 +29,6 @@ app.use('/api/login',login);
 app.use('/api/register',register)
 //app.use('/api/category',category)
 app.use('/api/user',user);// da ne bi smo mogli da kreiramo praznog usera jer je on kao abstraktna klasa 
-
-
 
 
 /*koristiti neku od ovih funkcija samo kad je potrebno izmeniti schemu, u ostalim situacijama nema potrebe*/
