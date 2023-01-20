@@ -10,9 +10,9 @@ const RoomsToJSON = (records) =>{
                 ID: field.properties.ID,
                 name:field.properties.name,
                 floor:field.properties.floor,
-                size:field.properties.size    
+                size:field.properties.size,
+                price:field.properties.price    
             })
-
         })
     })
     return item
@@ -27,6 +27,7 @@ const GetRoom = async(req,res) =>{
             floor : Room._properties.get("floor"),
             ID : Room._properties.get("ID"),
             size : Room._properties.get("size"),
+            price: Room._properties.get("price")
         }
         res.status(200).send(room)
     }
@@ -41,6 +42,7 @@ const CreateRoom = async (req,res) => {
         name: roomBody.name,
         floor: roomBody.floor,
         size: roomBody.size,
+        price: roomBody.price
     }).then(async room => {                        
             neo4j.writeCypher(`match (r:Room {ID: "${room._properties.get("ID")}"}),(s:Space {ID: "${req.body.spaceID}"}) create (s)-[rel:HASROOMS]->(r) return s,r,rel`)
             .then(result => {  
@@ -52,6 +54,7 @@ const CreateRoom = async (req,res) => {
             ID: room._properties.get('ID'),
             name:room._properties.get('name'),
             floor:room._properties.get('floor'),
+            price:room._properties.get('price')
         }).status(200)
             
         })        
