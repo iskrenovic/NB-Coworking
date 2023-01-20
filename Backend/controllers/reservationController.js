@@ -21,6 +21,23 @@ const ReservationsToJSON = (records) =>{
     return item
 }
 
+const ReservationsAndRoomNameToJSON = (records) =>{
+    let item= []
+    records.forEach(element => {
+        for(let i = 0;i<element._fields.length;i+=2){
+            item.push({
+                ID: element._fields[i].properties.ID,
+                dateStart:element._fields[i].properties.dateStart,
+                dateEnd:element._fields[i].properties.dateEnd,
+                status:element._fields[i].properties.status,
+                price:element._fields[i].properties.price,
+                name:element._fields[i + 1]
+            });
+        }        
+    })
+    return item
+}
+
 const RecordsToJSON = (records) =>{
     let item= []    
     records.forEach(element => {       
@@ -174,12 +191,22 @@ const GetAcceptedReservationByOwnerId = (req,res) => {
     }).catch(err => console.log(err))
 }
 
-const GetPendingReservationByOwnerIdRoom = (req,res) => {
+const GetPendingReservationByOwnerId = (req,res) => {
+    console.log(req.params.ID);
+    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) return r`)
+    .then(result => {
+        console.log(result.records);
+        let reservations = ReservationsToJSON(result.records)    
+        res.send(reservations).status(200)
+    }).catch(err => console.log(err))
+}
+
+/*const GetPendingReservationByOwnerIdRoom = (req,res) => {
     console.log(req.params.ID);
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTROOM]->(ro:Room), return r,ro.name`)
     .then(result => {
         console.log(result.records);
-        let reservationsforrooms = RecordsToJSON(result.records)    
+        let reservationsforrooms = ReservationsAndRoomNameToJSON(result.records)    
         res.send(reservationsforrooms).status(200)
     }).catch(err => console.log(err))
 }
@@ -189,10 +216,10 @@ const GetPendingReservationByOwnerIdPlace = (req,res) => {
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTPLACE]->(p:Place), return r,p.name`)
     .then(result => {
         console.log(result.records);
-        let reservationsforplaces = RecordsToJSON(result.records)    
+        let reservationsforplaces = ReservationsAndRoomNameToJSON(result.records)    
         res.send(reservationsforplaces).status(200)
     }).catch(err => console.log(err))
-}
+}*/
 
 module.exports = {
     GetReservation,
@@ -202,6 +229,7 @@ module.exports = {
     AcceptReservation,
     DenyReservation,
     GetAcceptedReservationByOwnerId,
-    GetPendingReservationByOwnerIdRoom,
-    GetPendingReservationByOwnerIdPlace
+    GetPendingReservationByOwnerId
+    //GetPendingReservationByOwnerIdRoom,
+    //GetPendingReservationByOwnerIdPlace
 };
