@@ -176,7 +176,7 @@ const GetAcceptedReservationByOwnerId = (req,res) => {
 
 const GetPendingReservationByOwnerIdRoom = (req,res) => {
     console.log(req.params.ID);
-    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTROOM]->(ro:Room), return r,ro`)
+    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTROOM]->(ro:Room), return r,ro.name`)
     .then(result => {
         console.log(result.records);
         let reservationsforrooms = RecordsToJSON(result.records)    
@@ -186,7 +186,7 @@ const GetPendingReservationByOwnerIdRoom = (req,res) => {
 
 const GetPendingReservationByOwnerIdPlace = (req,res) => {
     console.log(req.params.ID);
-    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTPLACE]->(p:Place), return r,p`)
+    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTPLACE]->(p:Place), return r,p.name`)
     .then(result => {
         console.log(result.records);
         let reservationsforplaces = RecordsToJSON(result.records)    
