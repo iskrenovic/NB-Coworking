@@ -1,8 +1,8 @@
 <template>
     <div>
         <h3> STATUS VASE REZERVACIJE: </h3>
-        <h2 v-if="accepted">Vasa rezervacija je potvrdjena!</h2>
-        <h2 v-if="denied">Nazalost, Vasa rezervacija je odbijena.</h2>
+        <h2 class="acc" v-if="accepted">Vasa rezervacija je potvrdjena!</h2>
+        <h2 class="den" v-if="denied">Nazalost, Vasa rezervacija je odbijena.</h2>
         <h2 v-if="!accepted && !denied">Ceka se potvrda Vaseg upita.</h2>
     </div>
 </template>
@@ -33,10 +33,10 @@ export default defineComponent({
         font-weight: normal;
         color: #333;
     }
-    h2[v-if="accepted"] {
+    .acc {
         color: green;
     }
-    h2[v-if="denied"] {
+    .den {
         color: red;
     }
 </style>
