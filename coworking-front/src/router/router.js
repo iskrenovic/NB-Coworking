@@ -6,6 +6,7 @@ import LoginRegister from '@/pages/login-register.vue'
 import SpacePage from '@/pages/space-page.vue'
 import RoomPage from '@/pages/room-page.vue'
 import OwnerDash from '@/pages/owner-dash.vue'
+import ReservationMsg from '@/pages/reservation-msg.vue'
 
 Vue.use(Router);
 
@@ -24,6 +25,11 @@ const r = new Router({
                 }
                 next()
             }
+        },
+        {
+            path:'/resmsg',
+            name:'ReservationMsg',
+            component:ReservationMsg
         },
         {
             path:'/login',
