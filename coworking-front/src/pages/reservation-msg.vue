@@ -20,7 +20,7 @@ export default defineComponent({
     },
     methods:{
         backToHome(){
-            this.$router.push('Homepage');
+            this.$router.push({name:'Homepage'});
         }
     },
     created(){
