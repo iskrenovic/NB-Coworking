@@ -31,6 +31,7 @@ app.use('/api/register',register)
 app.use('/api/user',user);// da ne bi smo mogli da kreiramo praznog usera jer je on kao abstraktna klasa 
 
 
+
 /*koristiti neku od ovih funkcija samo kad je potrebno izmeniti schemu, u ostalim situacijama nema potrebe*/
 /*sluzi za instaliranje scheme definisane modelima na bazu u cloud-u*/
 // neo4j.schema.install().then(() => console.log('Schema installed!'))

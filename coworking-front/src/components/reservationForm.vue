@@ -42,6 +42,9 @@ export default defineComponent({
             if(this.business){
                 link = 'addRequestAsBusiness';
             }
+            console.log("SALJEM");
+            console.log(this.user);
+            console.log(this.item);            
             await this.$store.dispatch(link,{
                 reservation:{
                     dateStart: new Date(this.pocetakRezervacije),

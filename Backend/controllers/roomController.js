@@ -1,33 +1,26 @@
 const { stringify } = require('nodemon/lib/utils');
 const neo4j = require('../config/neo4j_config');
 const redis_client = require('../config/redis_config');
+const { cypherLookup } = require('../helpers');
 const room = require('../models/roomModel');
 
+
 const RoomsToJSON = (records) =>{
-    let item= []
-    records.forEach(element => {
-        element._fields.forEach(field=>{
-            console.log(field.properties);
-            item.push({
-                ID: field.properties.ID,
-                name:field.properties.name,
-                floor:field.properties.floor,
-                size:field.properties.size,
-                price:field.properties.price    
-            })
-        })
+    let arr= []
+    records.forEach(r=>{
+        arr.push(RoomDTO(r));
     })
-    return item
+    return arr
 }
 
-function RoomDTO(Room) { 
-   
+function RoomDTO(Room) {
+    console.log("SOBA", Room);  
     let roomDTO = {
-        name : Room._properties.get("name"),
-        floor : Room._properties.get("floor"),
-        ID : Room._properties.get("ID"),
-        size : Room._properties.get("size"),
-        price: Room._properties.get("price")
+        name : Room.properties.name,
+        floor : Room.properties.floor,
+        ID : Room.properties.ID,
+        size : Room.properties.size,
+        price: Room.properties.price
     }
     return roomDTO  
 }
@@ -44,30 +37,11 @@ const GetRoom = async(req,res) =>{
     }
 }
 
-/*const GetAllRooms = async (req,res) => { 
-    try {                
-        redisData = await redis_client.get('rooms')
-        if(redisData != null)
-            res.status(200).send(JSON.parse(redisData))
-        else {           
-            let rooms = await neo4j.model('Room').all()
-            let roomsDTO = []
-            rooms.forEach(element => {
-                roomsDTO.push(RoomDTO(element))            
-            });
-            redis_client.setEx('rooms', 600,JSON.stringify(roomsDTO))
-            res.status(200).send(roomsDTO)
-        }    
-    }
-    catch(e) {         
-        res.status(500).send(e.message || e.toString())
-    }
-}*/
-
 const CreateRoom = async (req,res) => {   
     const roomBody = req.body 
-    redisData = await redis_client.get('rooms')
-    if(redisData!= null)
+    let redisData = await redis_client.get(`GetRoomsBySpaceId-${req.body.spaceID}`)
+    let newRedisData = [];
+    if(redisData)
         newRedisData = JSON.parse(redisData)    
     await neo4j.model("Room").create({
         name: roomBody.name,
@@ -84,13 +58,12 @@ const CreateRoom = async (req,res) => {
             ID: room._properties.get('ID'),
             name:room._properties.get('name'),
             floor:room._properties.get('floor'),
+            size : room._properties.get('size'),
             price:room._properties.get('price')
         }
         newRedisData.push(roomDTO)
-        redis_client.setEx('rooms',600,JSON.stringify(newRedisData))
-        res.send({
-            roomDTO
-        }).status(200)
+        redis_client.setEx(`GetRoomsBySpaceId-${req.body.spaceID}`,600,JSON.stringify(newRedisData))
+        res.status(200).send(roomDTO)
             
         })        
     .catch(err => res.send(err).status(400));
@@ -137,14 +110,9 @@ const GetRoomsBySpaceId = async (req,res) => {
         }  
         neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:HASROOMS]->(room:Room) return room`)
         .then(result => {
-            console.log(result.records);
-            let rooms = RoomsToJSON(result.records)
-            let roomsDTO = [] 
-            result.forEach(element => {
-                roomsDTO.push(RoomDTO(element))            
-            })
+            let roomsDTO = RoomsToJSON(cypherLookup(result.records,'room'));
             redis_client.setEx(`GetRoomsBySpaceId-${req.params.ID}`, 600,JSON.stringify(roomsDTO))  
-            res.send(rooms).status(200)
+            res.status(200).send(roomsDTO)
         }).catch(err => console.log(err))
     }
     catch(e) {         

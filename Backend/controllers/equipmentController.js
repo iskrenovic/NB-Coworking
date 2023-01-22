@@ -1,36 +1,29 @@
 const { stringify } = require('nodemon/lib/utils');
 const neo4j = require('../config/neo4j_config');
 const redis_client = require('../config/redis_config');
+const { cypherLookup } = require('../helpers');
 const equipment = require('../models/equipmentModel');
 //const { GetSpaceByOwnerId } = require('./spaceController');
 
 const EquipmentToJSON = (records) =>{
-    let item= []
-    records.forEach(element => {
-        element._fields.forEach(field=>{
-            console.log(field.properties);
-            item.push({
-                ID: field.properties.ID,
-                price: field.properties.price,    
-                description: field.properties.description,
-                name: field.properties.name
-            })
-
-        })
+    let arr= []
+    records.forEach(r=>{
+        arr.push(EquipmentDTO(r));
     })
-    return item
+    return arr
 }
 
 function EquipmentDTO(Equipment) { 
    
     let equipmentDTO = {
-        name : Equipment._properties.get("name"),
-        description : Equipment._properties.get("description"),
-        ID : Equipment._properties.get("ID"),
-        price : Equipment._properties.get("price"),
+        name : Equipment.properties.name,
+        description : Equipment.properties.description,
+        ID : Equipment.properties.ID,
+        price : Equipment.properties.price,
     }
     return equipmentDTO  
 }
+
 
 const GetEquipment = async(req,res) =>{
     let uuid = req.params.ID
@@ -46,9 +39,10 @@ const GetEquipment = async(req,res) =>{
 
 const CreateEquipment = async (req,res) => {    
     const equipmentBody = req.body
-    redisData = await redis_client.get('equipment')
-    if(redisData!= null)
-        newRedisData = JSON.parse(redisData)    
+    let redisData = await redis_client.get(`GetEquipmentBySpaceId-${req.body.spaceID}`)
+    let newRedisData = [];
+    if(redisData)
+        newRedisData = JSON.parse(redisData);
     await neo4j.model("Equipment").create({
         name: equipmentBody.name,
         description: equipmentBody.description,
@@ -66,10 +60,8 @@ const CreateEquipment = async (req,res) => {
             description: equipment._properties.get('description'),
         }
         newRedisData.push(equipmentDTO)
-        redis_client.setEx('equipment',600,JSON.stringify(newRedisData))
-        res.send({
-            equipmentDTO
-        }).status(200)
+        redis_client.setEx(`GetEquipmentBySpaceId-${req.body.spaceID}`,600,JSON.stringify(newRedisData))
+        res.status(200).send(equipmentDTO)
             
         })        
     .catch(err => res.send(err).status(400));
@@ -117,25 +109,15 @@ const GetEquipmentBySpaceId = async (req,res) => {
         } 
         neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:SPACEHASEQUIP]->(equipment:Equipment) return equipment`)
         .then(result => {
-            console.log(result.records);
-            let equipment = EquipmentToJSON(result.records)
-            let equipmentDTO = [] 
-            result.forEach(element => {
-                equipmentDTO.push(EquipmentDTO(element))            
-            })
+            let equipmentDTO = EquipmentToJSON(cypherLookup(result.records,'equipment'));
             redis_client.setEx(`GetEquipmentBySpaceId-${req.params.ID}`, 600,JSON.stringify(equipmentDTO))   
-            res.send(equipment).status(200)
+            res.status(200).send(equipmentDTO)
         }).catch(err => console.log(err))
     }
     catch(e) {         
         res.status(500).send(e.message || e.toString())
     }
 }
-
-/*const GetEquipmentByOwnerId = (req,res) => {
-    let spaces = GetSpaceByOwnerId(req.params.ID)
-    let equipment= GetEquipmentBySpaceId(spaces._properties.ID)
-}*/
 
 module.exports = {
     GetEquipment,

@@ -408,6 +408,7 @@ export default new Vuex.Store({
         async addRequestAsFreelancer({commit}, request) {
             return await Api().post('/api/reservation/createReservationAsFreelancer/', request.reservation).then(res=>{ 
                 if(res.status == 200){
+                    console.log(res.data);
                     commit('setRequest', res.data);
                     request.callback(res.data.ID);
                 }

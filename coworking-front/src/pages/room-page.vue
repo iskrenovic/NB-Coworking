@@ -54,7 +54,6 @@ export default defineComponent({
         crtajReserve(item){
             this.reserved=true;
             this.selectedSeat = item;
-            console.log("crtam rezerve ",this.reserved);
         },
         closeForm(){
             this.openFrom = false;

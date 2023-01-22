@@ -5,7 +5,6 @@ const ReservationsToJSON = (records) =>{
     let item= []
     records.forEach(element => {
         element._fields.forEach(field=>{
-            console.log(field.properties);
             item.push({
                 ID: field.properties.ID,
                 dateStart:field.properties.dateStart,
@@ -17,31 +16,6 @@ const ReservationsToJSON = (records) =>{
     })
     return item
 }
-
-const ReservationsAndRoomNameToJSON = (records) =>{
-    let item= []
-    records.forEach(element => {
-        for(let i = 0;i<element._fields.length;i+=2){
-            item.push({
-                ID: element._fields[i].properties.ID,
-                dateStart:element._fields[i].properties.dateStart,
-                dateEnd:element._fields[i].properties.dateEnd,
-                status:element._fields[i].properties.status,
-                price:element._fields[i].properties.price,
-                name:element._fields[i + 1]
-            });
-        }        
-    })
-    return item
-}
-
-const RecordsToJSON = (records) =>{
-    let item= []    
-    records.forEach(element => {       
-        item.push(element._fields[0].properties)
-    })
-    return item
-} 
 
 const GetReservation = async(req,res) =>{
     let uuid = req.params.ID
@@ -87,7 +61,6 @@ const AcceptReservation = async (req,res) => {
             sender: owner[0].properties.ID, //USER ID,
             reservation: reso, //RESERVATION
         }
-        console.log(msg);
         redis_client.publish("app:user", JSON.stringify(msg));
         res.status(200).send();
     } catch (e) {
@@ -131,10 +104,7 @@ const DenyReservation = async (req,res) =>{
 }
 
 const CreateReservationAsBusiness = async (req,res) => { 
-    if(await dateUnavailableForRoom(req.body.dateStart,req.body.dateEnd, req.body.placeID)){
-        res.status(409).send("DATE UNAVAILABLE");
-        return;
-    }    
+   
     const reservationBody = req.body    
     await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
@@ -159,17 +129,13 @@ const CreateReservationAsBusiness = async (req,res) => {
         }
         redis_client.publish("app:user", JSON.stringify(msg));
         
-        res.send(reso).status(200)
-            
-        })        
+        res.status(200).send(reso)            
+    })        
     .catch(err => res.send(err).status(400));
 }
 
 const CreateReservationAsFreelancer = async (req,res) => {   
-    if(await dateUnavailableForPlace(req.body.dateStart,req.body.dateEnd, req.body.placeID)){
-        res.status(409).send("DATE UNAVAILABLE");
-        return;
-    } 
+    
     const reservationBody = req.body    
     await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
@@ -177,20 +143,27 @@ const CreateReservationAsFreelancer = async (req,res) => {
         status:'pending'
     }).then(async reservation => {    
                                      
-        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[:RENTPLACE]->(r), (f)-[:FRENT]->(r),(f)-[:RENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,f,p,`)
-        .then(result => {
-                console.log(result);       
-                res.send({
-                        dateStart: reservation._properties.get('dateStart'),
-                        dateEnd: reservation._properties.get('dateEnd'),
-                        status:reservation._properties.get('status'),
-                        ID:reservation._properties.get("ID")
-                }).status(200)                
-            })          
-        })
-        .catch(err => console.log(err))
-       
-                
+        let ans = await neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[:RENTPLACE]->(r), (f)-[:FRENT]->(r),(f)-[:RENT]->(r), (o)-[:RESFOROWNER]->(r) return  o,f`)
+        console.log(ans.records);
+        let owner = cypherLookup(ans.records, 'o');
+        let freelancer = cypherLookup(ans.records, 'f');
+        let reso = {
+            dateStart: reservation._properties.get('dateStart'),
+            dateEnd: reservation._properties.get('dateEnd'),
+            status:reservation._properties.get('status'),
+            ID:reservation._properties.get("ID")
+        };
+        let msg = {
+            messageType: "reservation",
+            messageSubType: "freelancer",
+            destination: owner[0].properties.ID,//OWNER ID,
+            sender: freelancer[0].properties.ID, //USER ID,
+            reservation: reso, //RESERVATION
+        }
+        redis_client.publish("app:user", JSON.stringify(msg));        
+        console.log("RESO", reso);
+        res.status(200).send(reso);
+    })               
     .catch(err => res.send(err).status(400));
 }
 
@@ -209,79 +182,36 @@ const DeleteReservation = async (req,res) => {
     }
 }
 
-/*const UpdateReservation = async (req,res) => { 
-    try {
-        let reservation = await neo4j.model('Reservation').find(req.params.ID);
-        if (!reservation) { 
-            res.status(400).send("Couldn't find reservation.");
-            return;
-        }
-        await reservation.update({
-            dateStart: req.body.dateStart,
-            dateEnd: req.body.dateEnd
-        });
-        res.status(200).send();
-    } catch (e) {
-        console.log(e);
-        res.status(500).send(e);
-    }
-}*/
-
 const GetAcceptedReservationByOwnerId = (req,res) => {
-    console.log(req.params.ID);
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'accepted'}) return r`)
     .then(result => {
-        console.log(result.records);
         let reservations = ReservationsToJSON(result.records)    
-        res.send(reservations).status(200)
+        res.status(200).send(reservations)
     }).catch(err => console.log(err))
 }
 
 const GetPendingReservationByOwnerId = (req,res) => {
-    console.log(req.params.ID);
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) return r`)
     .then(result => {
-        console.log(result.records);
         let reservations = ReservationsToJSON(result.records)    
-        res.send(reservations).status(200)
+        res.status(200).send(reservations)
     }).catch(err => console.log(err))
 }
+// const dateUnavailableForPlace = async (dateStart, dateEnd, placeID) => {
+//     let resp = await neo4j.cypher(`match (r:Reservation {status: "accepted"})<-[:RENTPLACE]-(p:Place {ID:"${placeID}"}) where
+//     (r.dateStart < "${dateStart}" AND r.dateEnd > "${dateEnd}) OR
+//     (r.dateStart > "${dateStart}" AND r.dateStart < "${dateEnd}) OR
+//     (r.dateEnd < "${dateEnd}" AND r.dateEnd < "${dateStart}) return r;`);
+//     return resp.records.length > 0;
+// }
 
-/*const GetPendingReservationByOwnerIdRoom = (req,res) => {
-    console.log(req.params.ID);
-    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTROOM]->(ro:Room), return r,ro.name`)
-    .then(result => {
-        console.log(result.records);
-        let reservationsforrooms = ReservationsAndRoomNameToJSON(result.records)    
-        res.send(reservationsforrooms).status(200)
-    }).catch(err => console.log(err))
-}
-
-const GetPendingReservationByOwnerIdPlace = (req,res) => {
-    console.log(req.params.ID);
-    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) -[:RENTPLACE]->(p:Place), return r,p.name`)
-    .then(result => {
-        console.log(result.records);
-        let reservationsforplaces = ReservationsAndRoomNameToJSON(result.records)    
-        res.send(reservationsforplaces).status(200)
-    }).catch(err => console.log(err))
-}*/
-
-const dateUnavailableForPlace = async (dateStart, dateEnd, placeID) => {
-    let resp = await neo4j.cypher(`match (r:Reservation {status: "accepted"})<-[:RENTPLACE]-(p:Place {ID:"${placeID}"}) where
-    (r.dateStart < "${dateStart}" AND r.dateEnd > "${dateEnd}) OR
-    (r.dateStart > "${dateStart}" AND r.dateStart < "${dateEnd}) OR
-    (r.dateEnd < "${dateEnd}" AND r.dateEnd < "${dateStart}) return r;`);
-    return resp.records.length > 0;
-}
-
-const dateUnavailableForRoom = async (dateStart, dateEnd, roomID) => {
-    let resp = await neo4j.cypher(`match (r:Reservation {status: "accepted"})<-[:RENTROOM]-(r:Room {ID:"${roomID}"}) where
-    (r.dateStart < "${dateStart}" AND r.dateEnd > "${dateEnd}) OR
-    (r.dateStart > "${dateStart}" AND r.dateStart < "${dateEnd}) OR
-    (r.dateEnd < "${dateEnd}" AND r.dateEnd < "${dateStart}) return r;`);
-    return resp.records.length > 0;
-}
+// const dateUnavailableForRoom = async (dateStart, dateEnd, roomID) => {
+//     let resp = await neo4j.cypher(`match (r:Reservation {status: "accepted"})<-[:RENTROOM]-(r:Room {ID:"${roomID}"}) where
+//     (r.dateStart < "${dateStart}" AND r.dateEnd > "${dateEnd}) OR
+//     (r.dateStart > "${dateStart}" AND r.dateStart < "${dateEnd}) OR
+//     (r.dateEnd < "${dateEnd}" AND r.dateEnd < "${dateStart}) return r;`);
+//     return resp.records.length > 0;
+// }
 
 module.exports = {
     GetReservation,

@@ -18,9 +18,11 @@ const newToArray = (arr, item)=>{
 
 const cypherLookup = (records, tag)=>{    
     if(!records || records.length==0) return [];
-    console.log(records);
     let arr = [];
     let i = keyIndexLookup(records[0].keys, tag);
+    if(i == -1){
+        console.error("TAG NOT FOUND");
+    }
     records.forEach(record=>{
         let item = record._fields[i];
         if(newToArray(arr, item)){

@@ -11,7 +11,11 @@
         <div class="seg">
             <h3>Size (m^2):</h3>
             <input type="number" v-model="size"/>
-        </div>       
+        </div>
+        <div class="seg">
+            <h3>Price:</h3>
+            <input type="number" v-model="price"/>
+        </div>            
         <button @click="createRoom">Create</button>
         <button @click="cancel">Cancel</button>
     </div>
@@ -27,7 +31,8 @@ export default defineComponent({
         return{
             name:'',
             floor:0,
-            size:0
+            size:0,
+            price:0
         }
     },
     methods:{
@@ -36,11 +41,12 @@ export default defineComponent({
             this.image = img;
         },       
         async createRoom(){
-            if(validateObjects(this.name, this.floor, this.size)){
+            if(validateObjects(this.name, this.floor, this.size, this.price)){
                 await this.$store.dispatch('addRoom', {
                     name:this.name,
                     floor:this.floor,
                     size: this.size,
+                    price: this.price,
                     spaceID: this.$route.params.id
                 });
             }

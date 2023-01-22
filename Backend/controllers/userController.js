@@ -55,10 +55,10 @@ const CreateUser = async (req,res) => {
             // })
             // .catch(err => console.log(err))
        
-        res.send({
+        res.status(200).send({
             ID: user._properties.get('ID'),
             name:user._properties.get('name')
-        }).status(200)
+        })
             
         })        
     .catch(err => res.send(err).status(400));
@@ -102,31 +102,9 @@ const GetUserBySpaceId = (req,res) => {
     -[rel:CONTAINS]->(user:User) return user`).then(result => {
         
         let users = UsersToJSON(result.records)    
-        res.send(users).status(200)
+        res.status(200).send(users)
     }).catch(err => console.log(err))
 }
-
-/*const AddToSpace = async (req,res) => {
-    let user = await neo4j.model('User').find(req.body.ID)
-    if (!user) {
-        res.status(400).send("User not found!")
-        return
-    }
-    let space = await neo4j.model('Space').first('name',req.body.name)
-    if (!space) {
-        res.status(400).send("Space not found!")
-        return
-    }
-    neo4j.cypher(`match (u:User {ID: "${req.body.ID}"}),(s:Space {name: "${req.body.name}"}) create (u)-[rel:BELONGS_TO]->(c) return m,c,rel`)
-            .then(result => {  
-                console.log(result);
-                if(result.records.length === 0) //error handle za ovo je obradjen iznad 
-                    res.send(400) //error handle ne radi 
-                res.send(result).status(200)         
-                
-            })
-            .catch(err => {res.status(400).send(result)})
-}*/
 
 module.exports = {
     GetUser,

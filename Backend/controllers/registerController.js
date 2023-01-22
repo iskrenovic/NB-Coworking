@@ -36,7 +36,7 @@ const CreateOwner = async (req,res) => {
                 contact : owner._properties.get("contact"),
                 role :owner._properties.get("role")
             }
-            res.send(user).status(200)  
+            res.status(200).send(user)  
 
         }).catch(err => {
             console.log(err);
@@ -70,7 +70,7 @@ const CreateBusiness = async (req,res) => {
                 contact : business._properties.get("contact"),
                 role :business._properties.get("role")
             }
-            res.send(user).status(200)  
+            res.status(200).send(user)  
 
         }).catch(err => res.status(400).send(err))
 
@@ -102,7 +102,7 @@ const CreateFreelancer = async (req,res) => {
                 contact : freelancer._properties.get("contact"),
                 role :freelancer._properties.get("role")
             }
-            res.send(user).status(200)  
+            res.status(200).send(user)
 
         }).catch(err => res.status(400).send(err))
 
