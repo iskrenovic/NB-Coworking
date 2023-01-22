@@ -19,22 +19,48 @@ const EquipmentToJSON = (records) =>{
         })
     })
     return item
-} 
+}
+
+function EquipmentDTO(Equipment) { 
+   
+    let equipmentDTO = {
+        name : Equipment._properties.get("name"),
+        description : Equipment._properties.get("description"),
+        ID : Equipment._properties.get("ID"),
+        price : Equipment._properties.get("price"),
+    }
+    return equipmentDTO  
+}
 
 const GetEquipment = async(req,res) =>{
     let uuid = req.params.ID
     try { 
         let Equipment = await neo4j.model('Equipment').find(uuid)
-        let equipment = {
-            name : Equipment._properties.get("name"),
-            description : Equipment._properties.get("description"),
-            ID : Equipment._properties.get("ID"),
-            price : Equipment._properties.get("price"),
-        }
+        let equipment = EquipmentDTO(Equipment)
         res.status(200).send(equipment)
     }
     catch(e) { 
         res.status(500).end(e.message || e.toString())
+    }
+}
+
+const GetAllEquipment = async (req,res) => { 
+    try {                
+        redisData = await redis_client.get('equipment')
+        if(redisData != null)
+            res.status(200).send(JSON.parse(redisData))
+        else {           
+            let equipment = await neo4j.model('Equipment').all()
+            let equipmentDTO = []
+            equipment.forEach(element => {
+                equipmentDTO.push(EquipmentDTO(element))            
+            });
+            redis_client.setEx('equipment', 600,JSON.stringify(equipmentDTO))
+            res.status(200).send(equipmentDTO)
+        }    
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
     }
 }
 
@@ -54,10 +80,10 @@ const CreateEquipment = async (req,res) => {
             })
             .catch(err => console.log(err))
         let equipmentDTO = { 
-            ID: place._properties.get('ID'),
-            price: place._properties.get('price'),
-            name: place._properties.get('name'),
-            description: place._properties.get('description'),
+            ID: equipment._properties.get('ID'),
+            price: equipment._properties.get('price'),
+            name: equipment._properties.get('name'),
+            description: equipment._properties.get('description'),
         }
         newRedisData.push(equipmentDTO)
         redis_client.setEx('equipment',600,JSON.stringify(newRedisData))
@@ -122,5 +148,6 @@ module.exports = {
     CreateEquipment,
     DeleteEquipment,
     UpdateEquipment,
-    GetEquipmentBySpaceId
+    GetEquipmentBySpaceId,
+    GetAllEquipment
 };

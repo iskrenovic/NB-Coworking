@@ -18,23 +18,49 @@ const RoomsToJSON = (records) =>{
         })
     })
     return item
-} 
+}
+
+function RoomDTO(Room) { 
+   
+    let roomDTO = {
+        name : Room._properties.get("name"),
+        floor : Room._properties.get("floor"),
+        ID : Room._properties.get("ID"),
+        size : Room._properties.get("size"),
+        price: Room._properties.get("price")
+    }
+    return roomDTO  
+}
 
 const GetRoom = async(req,res) =>{
     let uuid = req.params.ID
     try { 
         let Room = await neo4j.model('Room').find(uuid)
-        let room = {
-            name : Room._properties.get("name"),
-            floor : Room._properties.get("floor"),
-            ID : Room._properties.get("ID"),
-            size : Room._properties.get("size"),
-            price: Room._properties.get("price")
-        }
+        let room = RoomDTO(Room)
         res.status(200).send(room)
     }
     catch(e) { 
         res.status(500).end(e.message || e.toString())
+    }
+}
+
+const GetAllRooms = async (req,res) => { 
+    try {                
+        redisData = await redis_client.get('rooms')
+        if(redisData != null)
+            res.status(200).send(JSON.parse(redisData))
+        else {           
+            let rooms = await neo4j.model('Room').all()
+            let roomsDTO = []
+            rooms.forEach(element => {
+                roomsDTO.push(RoomDTO(element))            
+            });
+            redis_client.setEx('rooms', 600,JSON.stringify(roomsDTO))
+            res.status(200).send(roomsDTO)
+        }    
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
     }
 }
 
@@ -117,5 +143,6 @@ module.exports = {
     CreateRoom,
     DeleteRoom,
     UpdateRoom,
-    GetRoomsBySpaceId
+    GetRoomsBySpaceId,
+    GetAllRooms
 };

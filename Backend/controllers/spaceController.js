@@ -3,6 +3,18 @@ const neo4j = require('../config/neo4j_config');
 const redis_client = require('../config/redis_config');
 const space = require('../models/spaceModel');
 
+function SpaceDTO(Space) { 
+   
+    let spaceDTO = {
+        name : Space._properties.get("name"), 
+        address : Space._properties.get("address"),
+        ID : Space._properties.get("ID"),
+        contact : Space._properties.get("contact"),
+        city : Space._properties.get("city")
+    }
+    return spaceDTO  
+}
+
 const GetSpace = async(req,res) =>{
     let uuid = req.params.ID
     //console.log("ID je:", uuid);    
@@ -10,17 +22,31 @@ const GetSpace = async(req,res) =>{
         //console.log("Ja sam ovde i dajem sve od sebe");
         let Space = await neo4j.find('Space', uuid);
         //console.log("VRACENO JE", Space);
-        let space = {
-            name : Space._properties.get("name"), 
-            address : Space._properties.get("address"),
-            ID : Space._properties.get("ID"),
-            contact : Space._properties.get("contact"),
-            city : Space._properties.get("city")
-        }
+        let space = SpaceDTO(Space)
         res.status(200).send(space)
     }
     catch(e) { 
         res.status(500).end(e.message || e.toString())
+    }
+}
+
+const GetAllSpaces = async (req,res) => { 
+    try {                
+        redisData = await redis_client.get('spaces')
+        if(redisData != null)
+            res.status(200).send(JSON.parse(redisData))
+        else {           
+            let spaces = await neo4j.model('Space').all()
+            let spacesDTO = []
+            spaces.forEach(element => {
+                spacesDTO.push(SpaceDTO(element))            
+            });
+            redis_client.setEx('spaces', 600,JSON.stringify(spacesDTO))
+            res.status(200).send(spacesDTO)
+        }    
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
     }
 }
 
@@ -160,5 +186,6 @@ module.exports = {
     GetSpaceByOwnerId,
     GetSpacesByCity,
     GetRecommendedSpacesFreelancer,
-    GetRecommendedSpacesBusiness
+    GetRecommendedSpacesBusiness,
+    GetAllSpaces
 };

@@ -18,22 +18,48 @@ const PlacesToJSON = (records) =>{
         })
     })
     return item
-} 
+}
+
+function PlaceDTO(Place) { 
+   
+    let placeDTO = {
+        price : Place._properties.get("price"),
+        description : Place._properties.get("description"),
+        name : Place._properties.get("name"),
+        ID : Place._properties.get("ID"),
+    }
+    return placeDTO  
+}
 
 const GetPlace = async(req,res) =>{
     let uuid = req.params.ID
     try { 
         let Place = await neo4j.model('Place').find(uuid)
-        let place = {
-            price : Place._properties.get("price"),
-            description : Place._properties.get("description"),
-            name : Place._properties.get("name"),
-            ID : Place._properties.get("ID"),
-        }
+        let place = PlaceDTO(Place)
         res.status(200).send(place)
     }
     catch(e) { 
         res.status(500).end(e.message || e.toString())
+    }
+}
+
+const GetAllPlaces = async (req,res) => { 
+    try {                
+        redisData = await redis_client.get('places')
+        if(redisData != null)
+            res.status(200).send(JSON.parse(redisData))
+        else {           
+            let places = await neo4j.model('Place').all()
+            let placesDTO = []
+            places.forEach(element => {
+                placesDTO.push(PlaceDTO(element))            
+            });
+            redis_client.setEx('places', 600,JSON.stringify(placesDTO))
+            res.status(200).send(placesDTO)
+        }    
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
     }
 }
 
@@ -116,5 +142,6 @@ module.exports = {
     CreatePlace,
     DeletePlace,
     UpdatePlace,
-    GetPlacesByRoomId
+    GetPlacesByRoomId,
+    GetAllPlaces
 };
