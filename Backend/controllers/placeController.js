@@ -43,7 +43,7 @@ const GetPlace = async(req,res) =>{
     }
 }
 
-const GetAllPlaces = async (req,res) => { 
+/*const GetAllPlaces = async (req,res) => { 
     try {                
         redisData = await redis_client.get('places')
         if(redisData != null)
@@ -61,7 +61,7 @@ const GetAllPlaces = async (req,res) => {
     catch(e) {         
         res.status(500).send(e.message || e.toString())
     }
-}
+}*/
 
 const CreatePlace = async (req,res) => {    
     const placeBody = req.body
@@ -127,14 +127,27 @@ const UpdatePlace = async (req,res) => {
     }
 }
 
-const GetPlacesByRoomId = (req,res) => {
-    console.log(req.params.ID);
-    neo4j.cypher(`match (:Room {ID : "${req.params.ID}"}) -[:HASPLACES]->(place:Place) return place`)
-    .then(result => {
-        console.log(result.records);
-        let places = PlacesToJSON(result.records)    
-        res.send(places).status(200)
-    }).catch(err => console.log(err))
+const GetPlacesByRoomId = async (req,res) => {
+    try {
+        redisData = await redis_client.get('places')
+            if(redisData != null)
+        res.status(200).send(JSON.parse(redisData))
+        console.log(req.params.ID);
+        neo4j.cypher(`match (:Room {ID : "${req.params.ID}"}) -[:HASPLACES]->(place:Place) return place`)
+        .then(result => {
+            console.log(result.records);
+            let places = PlacesToJSON(result.records)
+            let placesDTO = [] 
+            result.forEach(element => {
+                placesDTO.push(PlaceDTO(element))            
+            })
+            redis_client.setEx('places', 600,JSON.stringify(placesDTO))     
+            res.send(places).status(200)
+        }).catch(err => console.log(err))
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
+    }
 }
 
 module.exports = {
@@ -143,5 +156,4 @@ module.exports = {
     DeletePlace,
     UpdatePlace,
     GetPlacesByRoomId,
-    GetAllPlaces
 };

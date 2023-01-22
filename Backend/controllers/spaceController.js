@@ -30,7 +30,7 @@ const GetSpace = async(req,res) =>{
     }
 }
 
-const GetAllSpaces = async (req,res) => { 
+/*const GetAllSpaces = async (req,res) => { 
     try {                
         redisData = await redis_client.get('spaces')
         if(redisData != null)
@@ -48,7 +48,7 @@ const GetAllSpaces = async (req,res) => {
     catch(e) {         
         res.status(500).send(e.message || e.toString())
     }
-}
+}*/
 
 const RecordsToJSON = (records) =>{
     let item= []    
@@ -138,19 +138,40 @@ const UpdateSpace = async (req,res) => {
     }
 }
 
-const GetSpaceByOwnerId = (req,res) => {
-    console.log(req.params.ID);
-    neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:OWNER]->(space:Space) return space`).then(result => {
-        console.log(result.records);
-        let spaces = SpacesToJSON(result.records)    
-        res.send(spaces).status(200)
-    }).catch(err => console.log(err))
+const GetSpaceByOwnerId = async (req,res) => {
+    try {
+        redisData = await redis_client.get('spaces')
+            if(redisData != null)
+        res.status(200).send(JSON.parse(redisData))
+        console.log(req.params.ID);
+        neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:OWNER]->(space:Space) return space`).then(result => {
+            console.log(result.records);
+            let spaces = SpacesToJSON(result.records)
+            let spacesDTO = [] 
+            result.forEach(element => {
+                spacesDTO.push(SpaceDTO(element))            
+            })
+            redis_client.setEx('spaces', 600,JSON.stringify(spacesDTO)) 
+            res.send(spaces).status(200)
+        }).catch(err => console.log(err))
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
+    }
 }
 
 const GetSpacesByCity =  async(req,res) => {
     try{
-    let spaces = await neo4j.cypher(`Match (s:Space {city: "${req.params.city}"}) return s`);
-    res.status(200).send(RecordsToJSON(spaces.records)); 
+        redisData = await redis_client.get('spaces')
+            if(redisData != null)
+        res.status(200).send(JSON.parse(redisData))
+        let spaces = await neo4j.cypher(`Match (s:Space {city: "${req.params.city}"}) return s`);
+        let spacesDTO = [] 
+        spaces.forEach(element => {
+            spacesDTO.push(SpaceDTO(element))            
+        })
+        redis_client.setEx('spaces', 600,JSON.stringify(spacesDTO)) 
+        res.status(200).send(RecordsToJSON(spaces.records)); 
     }
     catch(err){
         console.log(err);
@@ -187,5 +208,4 @@ module.exports = {
     GetSpacesByCity,
     GetRecommendedSpacesFreelancer,
     GetRecommendedSpacesBusiness,
-    GetAllSpaces
 };

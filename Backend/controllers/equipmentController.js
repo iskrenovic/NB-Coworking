@@ -44,26 +44,6 @@ const GetEquipment = async(req,res) =>{
     }
 }
 
-const GetAllEquipment = async (req,res) => { 
-    try {                
-        redisData = await redis_client.get('equipment')
-        if(redisData != null)
-            res.status(200).send(JSON.parse(redisData))
-        else {           
-            let equipment = await neo4j.model('Equipment').all()
-            let equipmentDTO = []
-            equipment.forEach(element => {
-                equipmentDTO.push(EquipmentDTO(element))            
-            });
-            redis_client.setEx('equipment', 600,JSON.stringify(equipmentDTO))
-            res.status(200).send(equipmentDTO)
-        }    
-    }
-    catch(e) {         
-        res.status(500).send(e.message || e.toString())
-    }
-}
-
 const CreateEquipment = async (req,res) => {    
     const equipmentBody = req.body
     redisData = await redis_client.get('equipment')
@@ -128,14 +108,27 @@ const UpdateEquipment = async (req,res) => {
     }
 }
 
-const GetEquipmentBySpaceId = (req,res) => {
-    console.log(req.params.ID);
-    neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:SPACEHASEQUIP]->(equipment:Equipment) return equipment`)
-    .then(result => {
-        console.log(result.records);
-        let equipment = EquipmentToJSON(result.records)    
-        res.send(equipment).status(200)
-    }).catch(err => console.log(err))
+const GetEquipmentBySpaceId = async (req,res) => {
+    try {
+        redisData = await redis_client.get('equipment')
+            if(redisData != null)
+        res.status(200).send(JSON.parse(redisData))
+        console.log(req.params.ID);
+        neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:SPACEHASEQUIP]->(equipment:Equipment) return equipment`)
+        .then(result => {
+            console.log(result.records);
+            let equipment = EquipmentToJSON(result.records)
+            let equipmentDTO = [] 
+            result.forEach(element => {
+                equipmentDTO.push(EquipmentDTO(element))            
+            })
+            redis_client.setEx('equipment', 600,JSON.stringify(equipmentDTO))   
+            res.send(equipment).status(200)
+        }).catch(err => console.log(err))
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
+    }
 }
 
 /*const GetEquipmentByOwnerId = (req,res) => {
@@ -149,5 +142,4 @@ module.exports = {
     DeleteEquipment,
     UpdateEquipment,
     GetEquipmentBySpaceId,
-    GetAllEquipment
 };

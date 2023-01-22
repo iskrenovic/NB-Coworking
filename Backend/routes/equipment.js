@@ -6,8 +6,7 @@ const {
     DeleteEquipment,
     GetEquipment,
     UpdateEquipment,
-    GetEquipmentBySpaceId,
-    GetAllEquipment
+    GetEquipmentBySpaceId
 } = require('../controllers/equipmentController');
 const { route } = require('./space');
 
@@ -16,6 +15,5 @@ router.post('/createEquipment', CreateEquipment);
 router.delete('/deleteEquipment/:ID', DeleteEquipment);
 router.put('/updateEquipment/:ID', UpdateEquipment);
 router.get('/getEquipmentBySpaceId/:ID', GetEquipmentBySpaceId);
-router.get('/allEquipment',GetAllEquipment);
 
 module.exports = router;

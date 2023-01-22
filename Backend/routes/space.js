@@ -10,7 +10,6 @@ const {
     GetSpacesByCity,
     GetRecommendedSpacesBusiness,
     GetRecommendedSpacesFreelancer,
-    GetAllSpaces
 } = require('../controllers/spaceController');
 const { route } = require('./user');
 
@@ -22,6 +21,5 @@ router.get('/getSpaceByOwnerId/:ID', GetSpaceByOwnerId);
 router.get('/getSpacesByCity/:city', GetSpacesByCity);
 router.get('/getRecomendedSpaceFreelancer/:city/:ID',GetRecommendedSpacesFreelancer);
 router.get('/getRecomendedSpaceBusiness/:city/:ID',GetRecommendedSpacesBusiness);
-router.get('/allSpaces',GetAllSpaces);
 
 module.exports = router;

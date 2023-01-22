@@ -44,7 +44,7 @@ const GetRoom = async(req,res) =>{
     }
 }
 
-const GetAllRooms = async (req,res) => { 
+/*const GetAllRooms = async (req,res) => { 
     try {                
         redisData = await redis_client.get('rooms')
         if(redisData != null)
@@ -62,7 +62,7 @@ const GetAllRooms = async (req,res) => {
     catch(e) {         
         res.status(500).send(e.message || e.toString())
     }
-}
+}*/
 
 const CreateRoom = async (req,res) => {   
     const roomBody = req.body 
@@ -128,14 +128,27 @@ const UpdateRoom = async (req,res) => {
     }
 }
 
-const GetRoomsBySpaceId = (req,res) => {
-    console.log(req.params.ID);
-    neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:HASROOMS]->(room:Room) return room`)
-    .then(result => {
-        console.log(result.records);
-        let rooms = RoomsToJSON(result.records)    
-        res.send(rooms).status(200)
-    }).catch(err => console.log(err))
+const GetRoomsBySpaceId = async (req,res) => {
+    try {
+        redisData = await redis_client.get('rooms')
+            if(redisData != null)
+        res.status(200).send(JSON.parse(redisData))
+        console.log(req.params.ID);
+        neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:HASROOMS]->(room:Room) return room`)
+        .then(result => {
+            console.log(result.records);
+            let rooms = RoomsToJSON(result.records)
+            let roomsDTO = [] 
+            result.forEach(element => {
+                roomsDTO.push(RoomDTO(element))            
+            })
+            redis_client.setEx('rooms', 600,JSON.stringify(roomsDTO))  
+            res.send(rooms).status(200)
+        }).catch(err => console.log(err))
+    }
+    catch(e) {         
+        res.status(500).send(e.message || e.toString())
+    }
 }
 
 module.exports = {
@@ -144,5 +157,4 @@ module.exports = {
     DeleteRoom,
     UpdateRoom,
     GetRoomsBySpaceId,
-    GetAllRooms
 };

@@ -7,7 +7,6 @@ const {
     GetRoom,
     UpdateRoom,
     GetRoomsBySpaceId,
-    GetAllRooms
 } = require('../controllers/roomController');
 const { route } = require('./space');
 
@@ -16,6 +15,5 @@ router.post('/createRoom', CreateRoom);
 router.delete('/deleteRoom/:ID', DeleteRoom);
 router.put('/updateRoom/:ID', UpdateRoom);
 router.get('/getRoomsBySpaceId/:ID', GetRoomsBySpaceId);
-router.get('/allRooms',GetAllRooms);
 
 module.exports = router;
