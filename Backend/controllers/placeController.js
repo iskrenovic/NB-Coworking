@@ -129,10 +129,11 @@ const UpdatePlace = async (req,res) => {
 
 const GetPlacesByRoomId = async (req,res) => {
     try {
-        redisData = await redis_client.get('places')
-            if(redisData != null)
-        res.status(200).send(JSON.parse(redisData))
-        console.log(req.params.ID);
+        redisData = await redis_client.get(`GetPlacesByRoomId-${req.params.ID}`)
+        if(redisData){
+            res.status(200).send(JSON.parse(redisData))
+            return;
+        } 
         neo4j.cypher(`match (:Room {ID : "${req.params.ID}"}) -[:HASPLACES]->(place:Place) return place`)
         .then(result => {
             console.log(result.records);
@@ -141,7 +142,7 @@ const GetPlacesByRoomId = async (req,res) => {
             result.forEach(element => {
                 placesDTO.push(PlaceDTO(element))            
             })
-            redis_client.setEx('places', 600,JSON.stringify(placesDTO))     
+            redis_client.setEx(`GetPlacesByRoomId-${req.params.ID}`, 600,JSON.stringify(placesDTO))     
             res.send(places).status(200)
         }).catch(err => console.log(err))
     }

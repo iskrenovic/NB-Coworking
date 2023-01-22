@@ -110,10 +110,11 @@ const UpdateEquipment = async (req,res) => {
 
 const GetEquipmentBySpaceId = async (req,res) => {
     try {
-        redisData = await redis_client.get('equipment')
-            if(redisData != null)
-        res.status(200).send(JSON.parse(redisData))
-        console.log(req.params.ID);
+        redisData = await redis_client.get(`GetEquipmentBySpaceId-${req.params.ID}`)
+        if(redisData){
+            res.status(200).send(JSON.parse(redisData))
+            return;
+        } 
         neo4j.cypher(`match (:Space {ID : "${req.params.ID}"}) -[:SPACEHASEQUIP]->(equipment:Equipment) return equipment`)
         .then(result => {
             console.log(result.records);
@@ -122,7 +123,7 @@ const GetEquipmentBySpaceId = async (req,res) => {
             result.forEach(element => {
                 equipmentDTO.push(EquipmentDTO(element))            
             })
-            redis_client.setEx('equipment', 600,JSON.stringify(equipmentDTO))   
+            redis_client.setEx(`GetEquipmentBySpaceId-${req.params.ID}`, 600,JSON.stringify(equipmentDTO))   
             res.send(equipment).status(200)
         }).catch(err => console.log(err))
     }

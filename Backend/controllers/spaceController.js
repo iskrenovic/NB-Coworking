@@ -163,15 +163,18 @@ const GetSpaceByOwnerId = async (req,res) => {
 
 const GetSpacesByCity =  async(req,res) => {
     try{
-        redisData = await redis_client.get('spaces')
-            if(redisData != null)
-        res.status(200).send(JSON.parse(redisData))
+        redisData = await redis_client.get(`GetSpacesByCity-${req.params.city}`)
+        if(redisData != null)
+        {
+            res.status(200).send(JSON.parse(redisData))
+            return
+        }
         let spaces = await neo4j.cypher(`Match (s:Space {city: "${req.params.city}"}) return s`);
         let spacesDTO = [] 
         spaces.forEach(element => {
             spacesDTO.push(SpaceDTO(element))            
         })
-        redis_client.setEx('spaces', 600,JSON.stringify(spacesDTO)) 
+        redis_client.setEx(`GetSpacesByCity-${req.params.city}`, 600,JSON.stringify(spacesDTO)) 
         res.status(200).send(RecordsToJSON(spaces.records)); 
     }
     catch(err){
@@ -181,8 +184,19 @@ const GetSpacesByCity =  async(req,res) => {
 
 const GetRecommendedSpacesFreelancer =  async(req,res) => {
     try{
-    let neoResponce = await neo4j.cypher(`Match (:Freelancer {ID: "${req.params.ID}"})-[:FRENT]->(:Reservation{status:"accepted"})<-[:RENTPLACE]-(p1:Place), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(:Room)-[:HASPLACES]->(p2:Place) where p2.price < p1.price * 1.1 and p2.price > p1.price * 0.9 return distinct s limit 25`)
-    res.status(200).send(RecordsToJSON(neoResponce.records)); 
+        redisData = await redis_client.get(`GetRecommendedSpacesFreelancer-${req.params.ID}${req.params.city}`)
+        if(redisData != null)
+        {
+            res.status(200).send(JSON.parse(redisData))
+            return
+        }
+        let neoResponce = await neo4j.cypher(`Match (:Freelancer {ID: "${req.params.ID}"})-[:FRENT]->(:Reservation{status:"accepted"})<-[:RENTPLACE]-(p1:Place), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(:Room)-[:HASPLACES]->(p2:Place) where p2.price < p1.price * 1.1 and p2.price > p1.price * 0.9 return distinct s limit 25`)
+        let spacesDTO = [] 
+        neoResponce.forEach(element => {
+            spacesDTO.push(SpaceDTO(element))            
+        })
+        redis_client.setEx(`GetRecommendedSpacesFreelancer-${req.params.ID}${req.params.city}`, 600,JSON.stringify(spacesDTO)) 
+        res.status(200).send(RecordsToJSON(neoResponce.records)); 
     }
     catch(err){
         console.error(err);
@@ -191,8 +205,18 @@ const GetRecommendedSpacesFreelancer =  async(req,res) => {
 
 const GetRecommendedSpacesBusiness =  async(req,res) => {
     try{
-        console.log("OVDE SAM");
+        redisData = await redis_client.get(`GetRecommendedSpacesBusiness-${req.params.ID}${req.params.city}`)
+        if(redisData != null)
+        {
+            res.status(200).send(JSON.parse(redisData))
+            return
+        }
         let neoResponce = await neo4j.cypher(`Match (:Business {ID: "${req.params.ID}"})-[:BRENT]->(:Reservation)<-[:RENTROOM]-(r1:Room), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(r2:Room) where r2.price < r1.price * 1.1 and r2.price > r1.price * 0.9 return distinct s limit 25`)
+        let spacesDTO = [] 
+        neoResponce.forEach(element => {
+            spacesDTO.push(SpaceDTO(element))            
+        })
+        redis_client.setEx(`GetRecommendedSpacesBusiness-${req.params.ID}${req.params.city}`, 600,JSON.stringify(spacesDTO))
         res.status(200).send(RecordsToJSON(neoResponce.records)); 
     }
     catch(err){
