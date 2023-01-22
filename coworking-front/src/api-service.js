@@ -7,6 +7,7 @@ export default new Vuex.Store({
     state:{
         user:null,
         spaces:null,
+        spacesRecommended:null,
         rooms:null,
         seats:null,
         equipment:null,
@@ -17,6 +18,9 @@ export default new Vuex.Store({
     getters:{
         getSpaces(state){
             return state.spaces;
+        },
+        getRecommendedSpaces(state){
+            return state.spacesRecommended;
         },
         getRooms(state){
             return state.rooms;
@@ -120,7 +124,36 @@ export default new Vuex.Store({
             try{
                 let res = await Api().get(`api/space/getSpacesByCity/${city}`);
                 if(res.status==200){
-                commit('setSpaces', res.data);
+                    console.log(res.data);
+                    commit('setSpaces', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            }
+            catch(err){
+                console.log(err);
+            }
+        },
+        async getRecommendedSpacesFreelancer({commit}, req){
+            try{
+                let res = await Api().get(`api/space/getRecomendedSpaceFreelancer/${req.city}/${req.userID}`);
+                if(res.status==200){
+                    commit('setRecommendedSpaces', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            }
+            catch(err){
+                console.log(err);
+            }
+        },
+        async getRecommendedSpacesBusienss({commit}, req){
+            try{
+                let res = await Api().get(`api/space/getRecomendedSpaceBusiness/${req.city}/${req.userID}`);
+                if(res.status==200){
+                    commit('setRecommendedSpaces', res.data);
                 }
                 else{
                     console.error(res);
@@ -392,6 +425,9 @@ export default new Vuex.Store({
         },
         setSpaces(state, spaces){
             state.spaces = spaces;
+        },
+        setRecommendedSpaces(state, spaces){
+            state.spacesRecommended = spaces;
         },
         addNewSpace(state, space){
             if(!state.spaces) state.spaces = []

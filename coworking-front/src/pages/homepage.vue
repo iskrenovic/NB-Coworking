@@ -7,6 +7,9 @@
             <button @click="loginClick">{{(getUser?'LOGOUT':'LOGIN')}}</button>
         </div>
         <search-bar pocetnoMesto="Užice" @pronadjeno="searchPronadjen"/>
+        <h3 v-if="recommendedSpaces && recommendedSpaces.length>0">RECOMMENDED FOR YOU:</h3>
+        <space-list v-if="recommendedSpaces" :list="recommendedSpaces" type="space" />
+        <h3>ALL:</h3>
         <space-list :list="spaces" type="space" />
     </div>
 </template>
@@ -50,27 +53,30 @@ export default defineComponent({
     },
     data(){
         return{
-            spaces:[{
-                _id:1,
-                name:'Coworking Nis',
-                address:'Nekoga Tamo 12'
-            },
-            {
-                _id:2,
-                name:'Startup Nis',
-                address:'Odmah Iza 69'
-            },
-            {
-                _id:3,
-                name:'Coworkingujemo',
-                address:'Znas Ti Znas 420'
-            }],
+            spaces:[],
+            recommendedSpaces:[],
             user:null
         }
     },
-    created(){
+    async created(){
         this.user = this.$store.getters['getUser'];
-        console.log(this.user);
+        if(!this.user){
+            await this.$store.dispatch('getUser', this.$cookies.get('uId'));
+            this.user = this.$store.getters['getUser'];
+        } 
+        await this.$store.dispatch('getSpacesByCity', 'Nis');        
+        this.spaces = this.$store.getters['getSpaces'];
+        if(this.user.role!='owner'){
+            let url = 'getRecommendedSpacesFreelancer';
+            if(this.user.role == 'business') url = 'getRecommendedSpacesBusienss';
+            console.log(url);
+            await this.$store.dispatch(url, {
+                city:'Nis',
+                userID:this.user.ID
+            });
+            this.recommendedSpaces = this.$store.getters['getRecommendedSpaces'];
+            if(!this.recommendedSpaces) this.recommendedSpaces = [];
+        }
     }
 })
 </script>

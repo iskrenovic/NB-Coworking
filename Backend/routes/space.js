@@ -18,6 +18,7 @@ router.post('/createSpace/', CreateSpace);
 router.delete('/deleteSpace/:ID', DeleteSpace);
 router.put('/updateSpace/:ID', UpdateSpace);
 router.get('/getSpaceByOwnerId/:ID', GetSpaceByOwnerId);
+router.get('/getSpacesByCity/:city', GetSpacesByCity);
 router.get('/getRecomendedSpaceFreelancer/:city/:ID',GetRecommendedSpacesFreelancer);
 router.get('/getRecomendedSpaceBusiness/:city/:ID',GetRecommendedSpacesBusiness);
 
