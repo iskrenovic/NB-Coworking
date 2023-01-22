@@ -158,7 +158,11 @@ const CreateReservationAsBusiness = async (req,res) => {
     .catch(err => res.send(err).status(400));
 }
 
-const CreateReservationAsFreelancer = async (req,res) => {    
+const CreateReservationAsFreelancer = async (req,res) => {   
+    if(await dateUnavailable(req.body.dateStart,req.body.dateEnd)){
+        res.status(409).send("DATE UNAVAILABLE");
+        return;
+    } 
     const reservationBody = req.body    
     await neo4j.model("Reservation").create({
         dateStart: reservationBody.dateStart,
@@ -254,6 +258,15 @@ const GetPendingReservationByOwnerIdPlace = (req,res) => {
         res.send(reservationsforplaces).status(200)
     }).catch(err => console.log(err))
 }*/
+
+const dateUnavailable = async (dateStart, dateEnd) => {
+    let resp = await neo4j.cypher(`match (r:Reservation) where
+    ((r.dateStart < "${dateStart}" AND r.dateEnd > "${dateEnd}) OR
+    (r.dateStart > "${dateStart}" AND r.dateStart < "${dateEnd}) OR
+    (r.dateEnd < "${dateEnd}" AND r.dateEnd < "${dateStart})) AND
+    r.status="accepted" return r;`);
+    return resp.records.length > 0;
+}
 
 module.exports = {
     GetReservation,
