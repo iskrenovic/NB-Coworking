@@ -1,4 +1,6 @@
+const { stringify } = require('nodemon/lib/utils');
 const neo4j = require('../config/neo4j_config');
+const redis_client = require('../config/redis_config');
 const equipment = require('../models/equipmentModel');
 //const { GetSpaceByOwnerId } = require('./spaceController');
 
@@ -37,7 +39,10 @@ const GetEquipment = async(req,res) =>{
 }
 
 const CreateEquipment = async (req,res) => {    
-    const equipmentBody = req.body    
+    const equipmentBody = req.body
+    redisData = await redis_client.get('equipment')
+    if(redisData!= null)
+        newRedisData = JSON.parse(redisData)    
     await neo4j.model("Equipment").create({
         name: equipmentBody.name,
         description: equipmentBody.description,
@@ -48,12 +53,16 @@ const CreateEquipment = async (req,res) => {
                 console.log(result);                 
             })
             .catch(err => console.log(err))
-       
-        res.send({
+        let equipmentDTO = { 
             ID: place._properties.get('ID'),
             price: place._properties.get('price'),
             name: place._properties.get('name'),
             description: place._properties.get('description'),
+        }
+        newRedisData.push(equipmentDTO)
+        redis_client.setEx('equipment',600,JSON.stringify(newRedisData))
+        res.send({
+            equipmentDTO
         }).status(200)
             
         })        

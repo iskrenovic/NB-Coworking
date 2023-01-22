@@ -1,4 +1,6 @@
+const { stringify } = require('nodemon/lib/utils');
 const neo4j = require('../config/neo4j_config');
+const redis_client = require('../config/redis_config');
 const room = require('../models/roomModel');
 
 const RoomsToJSON = (records) =>{
@@ -36,8 +38,11 @@ const GetRoom = async(req,res) =>{
     }
 }
 
-const CreateRoom = async (req,res) => {    
-    const roomBody = req.body    
+const CreateRoom = async (req,res) => {   
+    const roomBody = req.body 
+    redisData = await redis_client.get('rooms')
+    if(redisData!= null)
+        newRedisData = JSON.parse(redisData)    
     await neo4j.model("Room").create({
         name: roomBody.name,
         floor: roomBody.floor,
@@ -49,12 +54,16 @@ const CreateRoom = async (req,res) => {
                 console.log(result);               
             })
             .catch(err => console.log(err))
-       
-        res.send({
+        let roomDTO = { 
             ID: room._properties.get('ID'),
             name:room._properties.get('name'),
             floor:room._properties.get('floor'),
             price:room._properties.get('price')
+        }
+        newRedisData.push(roomDTO)
+        redis_client.setEx('rooms',600,JSON.stringify(newRedisData))
+        res.send({
+            roomDTO
         }).status(200)
             
         })        

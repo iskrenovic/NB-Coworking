@@ -1,4 +1,6 @@
+const { stringify } = require('nodemon/lib/utils');
 const neo4j = require('../config/neo4j_config');
+const redis_client = require('../config/redis_config');
 const space = require('../models/spaceModel');
 
 const GetSpace = async(req,res) =>{
@@ -48,7 +50,10 @@ const SpacesToJSON = (records) =>{
 } 
 
 const CreateSpace = async (req,res) => {    
-    const spaceBody = req.body    
+    const spaceBody = req.body
+    redisData = await redis_client.get('spaces')
+    if(redisData!= null)
+        newRedisData = JSON.parse(redisData)    
     await neo4j.model("Space").create({
         name: spaceBody.name,
         address: spaceBody.address,
@@ -60,11 +65,15 @@ const CreateSpace = async (req,res) => {
                 console.log(result);                
             })
             .catch(err => console.log(err))
-       
-        res.send({
+        let spaceDTO = { 
             ID: space._properties.get('ID'),
             name:space._properties.get('name'),
-            address:space._properties.get('address') 
+            address:space._properties.get('address')
+        }
+        newRedisData.push(spaceDTO)
+        redis_client.setEx('spaces',600,JSON.stringify(newRedisData))
+        res.send({
+            spaceDTO 
         }).status(200)
             
         })        

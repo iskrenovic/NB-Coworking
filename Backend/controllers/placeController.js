@@ -1,4 +1,6 @@
+const { stringify } = require('nodemon/lib/utils');
 const neo4j = require('../config/neo4j_config');
+const redis_client = require('../config/redis_config');
 const place = require('../models/placeModel');
 
 const PlacesToJSON = (records) =>{
@@ -36,7 +38,10 @@ const GetPlace = async(req,res) =>{
 }
 
 const CreatePlace = async (req,res) => {    
-    const placeBody = req.body    
+    const placeBody = req.body
+    redisData = await redis_client.get('places')
+    if(redisData!= null)
+        newRedisData = JSON.parse(redisData)    
     await neo4j.model("Place").create({
         price: placeBody.price,
         name: placeBody.name,
@@ -47,12 +52,16 @@ const CreatePlace = async (req,res) => {
                 console.log(result);                 
             })
             .catch(err => console.log(err))
-       
-        res.send({
+        let placeDTO = { 
             ID: place._properties.get('ID'),
             price: place._properties.get('price'),
             //name: place._properties.get('name'),
             //description: place._properties.get('description'),
+        }
+        newRedisData.push(placeDTO)
+        redis_client.setEx('places',600,JSON.stringify(newRedisData))
+        res.send({
+            placeDTO
         }).status(200)
             
         })        
