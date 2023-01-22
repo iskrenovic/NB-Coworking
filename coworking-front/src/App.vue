@@ -6,7 +6,7 @@
 
 <script>
 import { defineComponent } from '@vue/composition-api'
-
+import {messageReceved} from '@/ws_handler'
 export default defineComponent({
     name:'App',
     methods:{
@@ -17,7 +17,7 @@ export default defineComponent({
             }
             ws.onmessage = async(event)=>{
                 let message = JSON.parse(event.data);
-                console.log(message);
+                messageReceved(message);
             }
             ws.onclose = async ()=>{
                 //U slucaju da se desi disconnect, da se opet konektuje i prijavi                

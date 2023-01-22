@@ -338,6 +338,7 @@ export default new Vuex.Store({
                 console.log(err);
             }
         },
+        
         async getAcceptedRequests({commit},id){
             try{
                 let res = await Api().get(`api/reservation/getAcceptedReservationByOwnerId/${id}`); 
@@ -347,6 +348,22 @@ export default new Vuex.Store({
                 }
                 else{
                     console.error(res);
+                }
+            }
+            catch (err){
+                console.log(err);
+            }
+        },
+        async getRequestById({commit},req){
+            try{
+                let res = await Api().get(`api/reservation/getReservation/${req.id}`); 
+                if(res.status == 200){
+                    commit('setRequest', res.data);
+                    req.callback(res.data.status);
+                }
+                else{
+                    console.error(res);
+                    req.callback(false)
                 }
             }
             catch (err){
@@ -375,22 +392,26 @@ export default new Vuex.Store({
             })
         },
         async addRequestAsBusiness({commit}, request) {
-            return await Api().post('/api/reservation/createReservationAsBusiness/', request).then(res=>{  //TODO
+            return await Api().post('/api/reservation/createReservationAsBusiness/', request.reservation).then(res=>{ 
                 if(res.status == 200){
                     commit('setRequest', res.data);
+                    request.callback(res.data.ID);
                 }
                 else{
                     console.error(res);
+                    request.callback(false);
                 }
             })
         },
         async addRequestAsFreelancer({commit}, request) {
-            return await Api().post('/api/reservation/createReservationAsFreelancer/', request).then(res=>{  //TODO
+            return await Api().post('/api/reservation/createReservationAsFreelancer/', request.reservation).then(res=>{ 
                 if(res.status == 200){
                     commit('setRequest', res.data);
+                    request.callback(res.data.ID);
                 }
                 else{
                     console.error(res);
+                    request.callback(false);
                 }
             })
         },
@@ -405,18 +426,7 @@ export default new Vuex.Store({
             catch (err){
                 console.log(err);
             }
-        },
-        //@DIMI
-        async addReservation({commit}, reservation) {
-            return await Api().post('/api/reservation/createReservation', reservation).then(res=>{
-                if(res.status == 200){
-                    commit('setReservations', res.data);
-                }
-                else{
-                    console.error(res);
-                }
-            })
-        },
+        },        
         
     },
     mutations:{
@@ -470,9 +480,7 @@ export default new Vuex.Store({
         },
         setRequests(state, requests){
             state.requests = [];
-            requests.forEach(r=>{
-                console.log(r.dateStart);
-                new Date()
+            requests.forEach(r=>{                
                 state.requests.push({
                     ID:r.ID,
                     dateStart: new Date(r.dateStart.year.low,r.dateStart.month.low, r.dateStart.day.low,0,0,0,0),
@@ -482,9 +490,7 @@ export default new Vuex.Store({
         }, 
         setAcceptedRequests(state, requests){
             state.acceptedRequests = [];
-            requests.forEach(r=>{
-                console.log(r.dateStart);
-                new Date()
+            requests.forEach(r=>{                
                 state.acceptedRequests.push({
                     ID:r.ID,
                     dateStart: new Date(r.dateStart.year.low,r.dateStart.month.low, r.dateStart.day.low,0,0,0,0),
@@ -498,10 +504,22 @@ export default new Vuex.Store({
         removeRequest(state, id){
             state.requests = state.requests.filter(p=>p.ID != id);
         },
-        //@DIMI
-        setReservations(state, reservations){
-            if(!state.reservations) state.reservations=[]
-            state.reservations.push(reservations);
-        },       
+        addRequest(state, req){
+            console.log(req);
+            if(!state.requests) state.requests = [];
+            state.requests.push({
+                ID:req.ID,
+                dateStart: new Date(req.dateStart.year.low,req.dateStart.month.low, req.dateStart.day.low,0,0,0,0),
+                dateEnd: new Date(req.dateEnd.year.low,req.dateEnd.month.low, req.dateEnd.day.low,0,0,0,0)
+            });
+        },
+        addAcceptedRequest(state, req){
+            if(!state.acceptedRequests) state.acceptedRequests = [];
+            state.acceptedRequests.push({
+                ID:req.ID,
+                dateStart: new Date(req.dateStart.year.low,req.dateStart.month.low, req.dateStart.day.low,0,0,0,0),
+                dateEnd: new Date(req.dateEnd.year.low,req.dateEnd.month.low, req.dateEnd.day.low,0,0,0,0)
+            });
+        }
     }
 })

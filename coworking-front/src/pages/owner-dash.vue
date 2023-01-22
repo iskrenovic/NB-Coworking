@@ -1,13 +1,13 @@
 <template>
-    <div class="ui">
-        <div class="section" v-if="getPendingRequests">
+    <div class="ui" v-if="loaded">
+        <div class="section">
             <h3>Requests</h3>
-            <h3 v-if="getPendingRequests.length==0">EMPTY</h3>
+            <h3 v-if="pendingRequests.length==0">EMPTY</h3>
             <request-list :requests="getPendingRequests"/>
         </div>
-        <div class="section" v-if="getAcceptedRequests">
+        <div class="section">
             <h3>Today inside:</h3>   
-            <h3 v-if="getAcceptedRequests.length==0">EMPTY</h3>
+            <h3 v-if="getAcceptedRequests">EMPTY</h3>
             <request-list :requests="getAcceptedRequests"/>
         </div>
         <div class="section">
@@ -24,6 +24,7 @@ import { defineComponent } from '@vue/composition-api'
 import spaceList from '@/components/space-list.vue';
 import spaceForm from '@/components/Owner/space-form.vue';
 import requestList from '@/components/Owner/request-list.vue';
+import {registerCallback} from '@/ws_handler'
 export default defineComponent({
     name:'owner-dash',
     components:{
@@ -35,20 +36,21 @@ export default defineComponent({
     data(){
         return{
             list:[],            
-            requests:[],
+            pendingRequests:[],
+            acceptedRequests:[],
             openCreateSpace:false,
             openEquipmentForm: false,
+            loaded:false
         }
     },
-    computed:{
+    computed:{ 
         getPendingRequests(){
             return this.$store.getters['getRequests'];
         },
-        getAcceptedRequests(){
-            let r = this.$store.getters['getAcceptedRequests'];
-            if(!r) return null;
+        getAcceptedRequests(){            
+            if(!this.acceptedRequests) return null;
             let today = (new Date()).toDateString();
-            return r.filter(p=>p.dateStart.toDateString() == today);
+            return this.acceptedRequests.filter(p=>p.dateStart.toDateString() == today);
         }
     },
     methods:{
@@ -74,7 +76,25 @@ export default defineComponent({
         });
         await this.$store.dispatch('getPendingRequests', this.$cookies.get('uId'));
         await this.$store.dispatch('getAcceptedRequests', this.$cookies.get('uId'));
-
+        if(!this.$store.getters['getRequests']) this.pendingRequests = [];
+        else this.pendingRequests = this.$store.getters['getRequests'];
+        if(!this.$store.getters['getAcceptedRequests']) this.acceptedRequests = [];
+        else this.acceptedRequests = this.$store.getters['getAcceptedRequests'];
+        registerCallback(msg=>{            
+            if(msg.reservation.status == "pending"){
+                console.log(msg.reservation);
+                this.$store.commit('addRequest', msg.reservation);
+                this.pendingRequests = this.$store.getters['getRequests'];
+                return;
+            }
+            this.$store.commit('addAcceptedRequest', msg.reservation);
+            this.acceptedRequests = this.$store.getters['getAcceptedRequests'];
+            return;
+        })
+        this.loaded = true;
+    },
+    async destroyed(){
+        registerCallback(null);
     }
 })
 </script>

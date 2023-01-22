@@ -43,12 +43,21 @@ export default defineComponent({
                 link = 'addRequestAsBusiness';
             }
             await this.$store.dispatch(link,{
+                reservation:{
                     dateStart: new Date(this.pocetakRezervacije),
                     dateEnd: new Date(this.krajRezervacije),
                     userID: this.user.ID,
                     placeID: this.item.ID
+                },
+                callback:(id)=>{
+                    if(!id){
+                        alert("NEUSPEŠNA REZERVACIJA");
+                        return;
+                    }
+                    this.$router.push({name:'ReservationPage', params:{id}});
+                }
             })
-            //TODO ovde treba da se emituje           
+
         },
     },
     emits:['reservationMade']

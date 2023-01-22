@@ -11,7 +11,7 @@ redisUserClient.connect();
 serverUser.on('connection',  async function connection(ws) {
     ws.on('message', async (data)=>{
         let response = JSON.parse(data)
-        console.log("PRIJAVLJEN", response);    
+        console.log("PRIJAVLJEN", response);
         if(response.init){
             ws.id = response.ID;
         }
@@ -22,7 +22,6 @@ serverUser.on('connection',  async function connection(ws) {
 redisUserClient.SUBSCRIBE('app:user',(message)=>{
     let msg = JSON.parse(message);
     serverUser.clients.forEach(client=>{
-        console.log("POKUSAVAM DA POSALJEM", client);
         if(client.id == msg.destination)
             client.send(JSON.stringify(message));
     })

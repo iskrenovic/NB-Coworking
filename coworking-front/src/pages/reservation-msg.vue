@@ -1,22 +1,46 @@
 <template>
     <div>
-        <h3> STATUS VASE REZERVACIJE: </h3>
-        <h2 class="acc" v-if="accepted">Vasa rezervacija je potvrdjena!</h2>
-        <h2 class="den" v-if="denied">Nazalost, Vasa rezervacija je odbijena.</h2>
-        <h2 v-if="!accepted && !denied">Ceka se potvrda Vaseg upita.</h2>
+        <h3> STATUS VAŠE REZERVACIJE: </h3>
+        <h2 class="acc" v-if="status == 'accepted'">Vaša rezervacija je potvrđena!</h2>
+        <h2 class="den" v-else-if="status == 'denied'">Nažalost, Vaša rezervacija je odbijena.</h2>
+        <h2 v-else>Čeka se potvrda Vašeg upita.</h2>
+        <button v-if="status == 'accepted' || status == 'denied'" @click="backToHome">Vratite se na početnu</button>
     </div>
 </template>
 
 <script>
 import { defineComponent } from '@vue/composition-api'
-
+import {registerCallback} from '@/ws_handler'
 export default defineComponent({
     name:'reservation-msg',
     data(){
         return{
-            accepted:false,
-            denied:false
+            status:"pending"
         }
+    },
+    methods:{
+        backToHome(){
+            this.$router.push('Homepage');
+        }
+    },
+    created(){
+        this.$store.dispatch('getRequestById',{
+            id: this.$route.params.id,
+            callback: (s)=>{
+                if(!s){
+                    alert("ERROR");
+                    return;
+                }
+                if(s == "pending"){
+                    registerCallback(msg=>{
+                        this.status = msg.reservation.status;
+                    })
+                    return;
+                }
+                this.status = s;
+            }
+        })
+       
     }
 })
 </script>

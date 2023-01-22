@@ -159,7 +159,7 @@ const GetSpacesByCity =  async(req,res) => {
 
 const GetRecommendedSpacesFreelancer =  async(req,res) => {
     try{
-    let neoResponce = await neo4j.cypher(`Match (:Freelancer {ID: "${req.params.ID}"})-[:FRENT]->(:Reservation{status:"accepted"})<-[:RENTPLACE]-(p1:Place), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(:Room)-[:HASPLACES]->(p2:Place) where p2.price < p1.price * 1.1 and p2.price > p1.price * 0.9 return s limit 25`)
+    let neoResponce = await neo4j.cypher(`Match (:Freelancer {ID: "${req.params.ID}"})-[:FRENT]->(:Reservation{status:"accepted"})<-[:RENTPLACE]-(p1:Place), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(:Room)-[:HASPLACES]->(p2:Place) where p2.price < p1.price * 1.1 and p2.price > p1.price * 0.9 return distinct s limit 25`)
     res.status(200).send(RecordsToJSON(neoResponce.records)); 
     }
     catch(err){
@@ -170,7 +170,7 @@ const GetRecommendedSpacesFreelancer =  async(req,res) => {
 const GetRecommendedSpacesBusiness =  async(req,res) => {
     try{
         console.log("OVDE SAM");
-        let neoResponce = await neo4j.cypher(`Match (:Business {ID: "${req.params.ID}"})-[:BRENT]->(:Reservation)<-[:RENTROOM]-(r1:Room), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(r2:Room) where r2.price < r1.price * 1.1 and r2.price > r1.price * 0.9 return s limit 25`)
+        let neoResponce = await neo4j.cypher(`Match (:Business {ID: "${req.params.ID}"})-[:BRENT]->(:Reservation)<-[:RENTROOM]-(r1:Room), (s:Space {city:"${req.params.city}"})-[:HASROOMS]->(r2:Room) where r2.price < r1.price * 1.1 and r2.price > r1.price * 0.9 return distinct s limit 25`)
         res.status(200).send(RecordsToJSON(neoResponce.records)); 
     }
     catch(err){

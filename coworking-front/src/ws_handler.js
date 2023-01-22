@@ -6,8 +6,11 @@ const registerCallback = (c)=>{
 }
 
 const messageReceved = (msg) => {
-    if(!callback) return;
-    callback(msg);
+    if(!callback){
+        console.log(msg);
+        return;
+    }
+    callback(JSON.parse(msg));
 }
 
 export {registerCallback, messageReceved}

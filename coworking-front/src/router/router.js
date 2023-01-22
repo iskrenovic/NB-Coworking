@@ -8,6 +8,7 @@ import RoomPage from '@/pages/room-page.vue'
 import OwnerDash from '@/pages/owner-dash.vue'
 import ReservationMsg from '@/pages/reservation-msg.vue'
 
+
 Vue.use(Router);
 
 
@@ -25,12 +26,7 @@ const r = new Router({
                 }
                 next()
             }
-        },
-        {
-            path:'/resmsg',
-            name:'ReservationMsg',
-            component:ReservationMsg
-        },
+        },        
         {
             path:'/login',
             name:'Login',
@@ -160,6 +156,11 @@ const r = new Router({
                     })
                 }               
             }
+        },
+        {
+            path:'/reservation/:id',
+            name:'ReservationPage',
+            component:ReservationMsg
         }
         
     ],
