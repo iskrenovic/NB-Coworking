@@ -102,10 +102,25 @@ const DenyReservation = async (req,res) =>{
             return;
         }
         await reservation.update({
-            //dateStart: req.body.dateStart,
-            //: req.body.dateEnd,
             status:'denied'
         });
+        cypher = await neo4j.cypher(`Match (o:Owner)-[:RESFOROWNER]->(r:Reservation {ID:"${req.params.ID}"})<-[:RENT]-(u:User) return o, u`)
+        let owner = cypherLookup(cypher.records, 'o');
+        let user = cypherLookup(cypher.records,'u');
+        let reso = {
+            dateStart: reservation._properties.get('dateStart'),
+            dateEnd: reservation._properties.get('dateEnd'),
+            status:reservation._properties.get('status')
+        };
+        let msg = {
+            messageType: "reservation",
+            messageSubType: "business",
+            destination: user[0].properties.ID,//OWNER ID,
+            sender: owner[0].properties.ID, //USER ID,
+            reservation: reso, //RESERVATION
+        }
+        console.log(msg);
+        redis_client.publish("app:user", JSON.stringify(msg));
         res.status(200).send();
     } catch (e) {
         console.log(e);
