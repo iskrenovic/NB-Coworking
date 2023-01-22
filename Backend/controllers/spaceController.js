@@ -140,10 +140,11 @@ const UpdateSpace = async (req,res) => {
 
 const GetSpaceByOwnerId = async (req,res) => {
     try {
-        redisData = await redis_client.get('spaces')
-            if(redisData != null)
-        res.status(200).send(JSON.parse(redisData))
-        console.log(req.params.ID);
+        redisData = await redis_client.get(`GetSpaceByOwnerId-${req.params.ID}`)
+        if(redisData){
+            res.status(200).send(JSON.parse(redisData))
+            return;
+        }        
         neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:OWNER]->(space:Space) return space`).then(result => {
             console.log(result.records);
             let spaces = SpacesToJSON(result.records)
@@ -151,7 +152,7 @@ const GetSpaceByOwnerId = async (req,res) => {
             result.forEach(element => {
                 spacesDTO.push(SpaceDTO(element))            
             })
-            redis_client.setEx('spaces', 600,JSON.stringify(spacesDTO)) 
+            redis_client.setEx(`GetSpaceByOwnerId-${req.params.ID}`, 600,JSON.stringify(spacesDTO)) 
             res.send(spaces).status(200)
         }).catch(err => console.log(err))
     }

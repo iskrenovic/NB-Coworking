@@ -60,6 +60,7 @@ export default new Vuex.Store({
                     commit('setUser', res.data);
                     Vue.$cookies.set('uId', res.data.ID,"24h");
                     account.callback(true);
+                    window.location.reload();
                 }                
                 else{
                     console.error(res);
@@ -74,6 +75,7 @@ export default new Vuex.Store({
                     commit('setUser', res.data);
                     Vue.$cookies.set('uId', res.data.ID,"24h");
                     req.callback(true);
+                    window.location.reload();
                 }
                 else{
                     console.error(res);
