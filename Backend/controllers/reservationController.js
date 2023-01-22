@@ -1,6 +1,7 @@
 const neo4j = require('../config/neo4j_config');
 const redis_client = require('../config/redis_config')
 const {cypherLookup} = require('../helpers')
+//Ovo je funkcija kojom Reservation koji je vraćen od strane neo4j-a pretvaramo u JSON
 const ReservationsToJSON = (records) =>{
     let item= []
     records.forEach(element => {
@@ -16,7 +17,7 @@ const ReservationsToJSON = (records) =>{
     })
     return item
 }
-
+//Vraća Reservation sa zadatim ID-em
 const GetReservation = async(req,res) =>{
     let uuid = req.params.ID
     try { 
@@ -33,7 +34,7 @@ const GetReservation = async(req,res) =>{
         res.status(500).end(e.message || e.toString())
     }
 }
-
+//Ovo je funkcija kojom vlasnik prostora može da prihvati rezervaciju
 const AcceptReservation = async (req,res) => {
     try {
         let reservation = await neo4j.model('Reservation').find(req.params.ID);
@@ -68,7 +69,7 @@ const AcceptReservation = async (req,res) => {
         res.status(500).send(e);
     }
 }
-
+//Ovo je funkcija kojom vlasnik prostora može da odbije rezervaciju
 const DenyReservation = async (req,res) =>{
     try {
         let reservation = await neo4j.model('Reservation').find(req.params.ID);
@@ -102,7 +103,7 @@ const DenyReservation = async (req,res) =>{
         res.status(500).send(e);
     }
 }
-
+//Ovom funkcijom korisnik tipa business rezerviše celu sobu
 const CreateReservationAsBusiness = async (req,res) => { 
    
     const reservationBody = req.body    
@@ -133,7 +134,7 @@ const CreateReservationAsBusiness = async (req,res) => {
     })        
     .catch(err => res.send(err).status(400));
 }
-
+//Ovom funkcijom korisnik tipa freelancer rezerviše mesto
 const CreateReservationAsFreelancer = async (req,res) => {   
     
     const reservationBody = req.body    
@@ -181,7 +182,7 @@ const DeleteReservation = async (req,res) => {
         res.status(400).end(e.message || e.toString())
     }
 }
-
+//Funcija koja vlasniku vraća sve prihvaćene rezervacije u njegovim objektima
 const GetAcceptedReservationByOwnerId = (req,res) => {
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'accepted'}) return r`)
     .then(result => {
@@ -189,7 +190,7 @@ const GetAcceptedReservationByOwnerId = (req,res) => {
         res.status(200).send(reservations)
     }).catch(err => console.log(err))
 }
-
+//Funcija koja vlasniku vraća sve rezervacije na čekanju u njegovim objektima
 const GetPendingReservationByOwnerId = (req,res) => {
     neo4j.cypher(`match (:User {ID : "${req.params.ID}"}) -[:RESFOROWNER]->(r:Reservation {status:'pending'}) return r`)
     .then(result => {
@@ -197,6 +198,10 @@ const GetPendingReservationByOwnerId = (req,res) => {
         res.status(200).send(reservations)
     }).catch(err => console.log(err))
 }
+
+//Ove funkcije su bile u planu da budu implementirane kako bi automatski prihvatali rezervacije, ali kako smo implementirali sistme potvrđivanja od strane vlasnika
+//Odlučili smo da odustanemo od te ideje, mada kad smo je iskucali smo je ostavili za neku buduću iteraciju softvera
+
 // const dateUnavailableForPlace = async (dateStart, dateEnd, placeID) => {
 //     let resp = await neo4j.cypher(`match (r:Reservation {status: "accepted"})<-[:RENTPLACE]-(p:Place {ID:"${placeID}"}) where
 //     (r.dateStart < "${dateStart}" AND r.dateEnd > "${dateEnd}) OR
@@ -221,7 +226,5 @@ module.exports = {
     AcceptReservation,
     DenyReservation,
     GetAcceptedReservationByOwnerId,
-    GetPendingReservationByOwnerId
-    //GetPendingReservationByOwnerIdRoom,
-    //GetPendingReservationByOwnerIdPlace
+    GetPendingReservationByOwnerId    
 };

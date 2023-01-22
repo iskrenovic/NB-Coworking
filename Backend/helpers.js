@@ -16,7 +16,7 @@ const newToArray = (arr, item)=>{
 //Saljemo tag kako bi odredili tip podataka
 //I to se prosledjuje dalje
 
-const cypherLookup = (records, tag)=>{    
+const cypherLookup = (records, tag, distinct = true)=>{    
     if(!records || records.length==0) return [];
     let arr = [];
     let i = keyIndexLookup(records[0].keys, tag);
@@ -25,7 +25,10 @@ const cypherLookup = (records, tag)=>{
     }
     records.forEach(record=>{
         let item = record._fields[i];
-        if(newToArray(arr, item)){
+        if(!distinct){
+            arr.push(item);
+        }
+        else if(newToArray(arr, item)){
             arr.push(item);
         }
     })

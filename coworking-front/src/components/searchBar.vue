@@ -1,14 +1,11 @@
 <template>
-    <div class="search-bar">
-        <input type="text" v-model="naziv"/>
+    <div class="search-bar">        
         <h3>Filtriraj rezultate</h3>
-        <h2>mesto</h2>
+        <h2>GRAD:</h2>
         <select v-model="selectMesto">
-            <option value="" >Svi</option>
+            <option value="">Svi</option>
             <option v-for="grad in gradovi" :key="grad">{{ grad }}</option>
-        </select>
-        <h2>Broj mesta</h2>
-        <input type="number" v-model="brojMesta"/>
+        </select>        
         <button @click="pronadji">Pronadji</button>
     </div>
 </template>
@@ -20,33 +17,39 @@ import { defineComponent } from '@vue/composition-api'
 export default defineComponent({
     name:'search-bar',
     props:{
-        pocetnoMesto:{
-            type: String,
-            required:true
+        business:{
+            type:Boolean,
+            required: false,
+            default: false
         }
     },
     data(){
         return {
             naziv:'',
             selectMesto:'',
-            brojMesta:1,
             gradovi:["Beograd", "Novi Sad", "Niš","Užice", "Zaječar"]
         }
     },
+    created(){
+        this.$store.dispatch('getCities', (data)=>{
+            this.gradovi = data;
+        })
+    },
     methods:{
         pronadji(){
-            this.$emit('pronadjeno', this.selectMesto,this.brojMesta);
+            if(this.selectMesto!='')
+                this.$emit('searchBy', this.selectMesto);
+            else{
+                this.$emit('cancelFilter');
+            }
         },
-    },
-    created(){
-        this.selectMesto = this.pocetnoMesto;
     },
     watch:{
         selectMesto: function(newValue){
             console.log("Promenjeno na", newValue);
         }
     },
-    emits:['pronadjeno']
+    emits:['searchBy','cancelFilter']
 })
 </script>
 

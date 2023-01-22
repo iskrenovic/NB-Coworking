@@ -13,7 +13,8 @@ export default new Vuex.Store({
         equipment:null,
         requests:null,
         acceptedRequests:null,
-        request:null
+        request:null,
+        cities:null
     },
     getters:{
         getSpaces(state){
@@ -126,8 +127,36 @@ export default new Vuex.Store({
             try{
                 let res = await Api().get(`api/space/getSpacesByCity/${city}`);
                 if(res.status==200){
-                    console.log(res.data);
                     commit('setSpaces', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            }
+            catch(err){
+                console.log(err);
+            }
+        },
+        async get10Spaces({commit}){
+            try{
+                let res = await Api().get(`api/space/get10Spaces/`);
+                if(res.status==200){
+                    commit('setSpaces', res.data);
+                }
+                else{
+                    console.error(res);
+                }
+            }
+            catch(err){
+                console.log(err);
+            }
+        },
+        async getCities({commit}, callback){
+            try{
+                let res = await Api().get(`api/space/getCities/`);
+                if(res.status==200){
+                    commit('setCities', res.data);
+                    callback(res.data);
                 }
                 else{
                     console.error(res);
@@ -433,6 +462,9 @@ export default new Vuex.Store({
         
     },
     mutations:{
+        setCities(state, cities){
+            state.cities = cities;
+        },
         setUser(state, user){
             state.user = user;
         },

@@ -16,6 +16,7 @@ const CreateOwner = async (req,res) => {
         res.status(409).send("USERNAME TAKEN");
         return;
     }
+    //Sve šifre obavezo heširamo kako se ne bi čuvale u svom normalnom stanju i ne bi bile sigurnosni rizik
     bcrypt.hash(req.body.password, saltRounds).then(hash => {
 
         neo4j.model("Owner").create({
@@ -108,7 +109,7 @@ const CreateFreelancer = async (req,res) => {
 
     }).catch(err => res.status(500).send(err))
 }
-
+//Proveravamo da nije neki username zauzet za svaki slučaj
 const usernameTaken = async (username, email) => {
     let resp = await neo4j.cypher(`match (user:User) where user.username = "${username}" OR user.email = "${email}" return user;`);
     return resp.records.length > 0;

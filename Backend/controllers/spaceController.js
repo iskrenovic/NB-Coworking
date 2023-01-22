@@ -4,6 +4,8 @@ const redis_client = require('../config/redis_config');
 const { cypherLookup } = require('../helpers');
 const space = require('../models/spaceModel');
 //redis_client.FLUSHALL();
+
+//Ovo je funkcija kojom Space koji je vraćen od strane neo4j-a pretvaramo u JSON
 function SpaceDTO(Space) { 
     let spaceDTO = {
         name : Space.properties.name, 
@@ -14,7 +16,16 @@ function SpaceDTO(Space) {
     }
     return spaceDTO  
 }
+//Ovo je funkcija kojom dobijamo niz JSON objekata Space-a
+const SpacesToJSON = (arr) =>{
+    let item= []
+    arr.forEach(el=>{
+        item.push(SpaceDTO(el));
+    })
+    return item
+} 
 
+//Vraća Space zadatog ID-a
 const GetSpace = async(req,res) =>{
     let uuid = req.params.ID
     //console.log("ID je:", uuid);    
@@ -29,30 +40,26 @@ const GetSpace = async(req,res) =>{
         res.status(500).end(e.message || e.toString())
     }
 }
-const SpacesToJSON = (arr) =>{
-    let item= []
-    arr.forEach(el=>{
-        item.push(SpaceDTO(el));
-    })
-    return item
-} 
 
+//Kreira Space
 const CreateSpace = async (req,res) => {    
     const spaceBody = req.body
     let redisData = await redis_client.get(`GetSpaceByOwnerId-${req.body.userID}`)
     let newRedisData = [];
     if(redisData)
         newRedisData = JSON.parse(redisData)    
+    
     await neo4j.model("Space").create({
         name: spaceBody.name,
         address: spaceBody.address,
         contact: spaceBody.contact,
         city: spaceBody.city,
-    }).then(async space => {
-            neo4j.writeCypher(`match (s:Space {ID: "${space._properties.get("ID")}"}),(u:User {ID: "${req.body.userID}"}) create (u)-[rel:OWNER]->(s) return u,s,rel`)
-            .then(result => { 
-            })
-            .catch(err => console.log(err))
+    }).then(async space => {        
+        //Povezujemo Cypher-om Space sa Vlasnikom (Owner)
+        neo4j.writeCypher(`match (s:Space {ID: "${space._properties.get("ID")}"}),(u:User {ID: "${req.body.userID}"}) create (u)-[rel:OWNER]->(s) return u,s,rel`)
+        .then(result => { 
+        })
+        .catch(err => console.log(err))
         let spaceDTO = { 
             ID: space._properties.get('ID'),
             name:space._properties.get('name'),
@@ -62,12 +69,13 @@ const CreateSpace = async (req,res) => {
         }
         newRedisData.push(spaceDTO);
         redis_client.setEx(`GetSpaceByOwnerId-${req.body.userID}`,600,JSON.stringify(newRedisData))
+        //Pamtimo u redis podatke i šaljemo korisniku
         res.status(200).send(spaceDTO);
             
         })        
     .catch(err => res.send(err).status(400));
 }
-
+//Brisanje Space-a
 const DeleteSpace = async (req,res) => { 
     try {        
         let result = await neo4j.model('Space').find(req.params.ID);
@@ -82,7 +90,7 @@ const DeleteSpace = async (req,res) => {
         res.status(400).end(e.message || e.toString())
     }
 }
-
+//Update Space-a
 const UpdateSpace = async (req,res) => { 
     try {
         let space = await neo4j.model('Space').find(req.params.ID);
@@ -99,7 +107,7 @@ const UpdateSpace = async (req,res) => {
         res.status(500).send(e);
     }
 }
-
+//Vraća sve Space-ove vlasnika sa zadatim ID-em
 const GetSpaceByOwnerId = async (req,res) => {
     try {
         redisData = await redis_client.get(`GetSpaceByOwnerId-${req.params.ID}`)
@@ -119,7 +127,7 @@ const GetSpaceByOwnerId = async (req,res) => {
         res.status(500).send(e.message || e.toString())
     }
 }
-
+//Vraća 10 Space-a korisnicima koji pristupaju sajtu bez filtriranja
 const Get10Spaces =  async(req,res) => {
     try{
         redisData = await redis_client.get(`Get10Spaces`)
@@ -138,6 +146,19 @@ const Get10Spaces =  async(req,res) => {
     }
 }
 
+//Vraća sve moguće gradove kako bi mogli da filtriramo na front-u
+const GetCities =  async(req,res) => {
+    try{        
+        let spaces = await neo4j.cypher(`Match (s:Space ) return distinct s.city limit 10`);
+        console.log(spaces.records);
+        let cities = cypherLookup(spaces.records,'s.city', false);
+        res.status(200).send(cities); 
+    }
+    catch(err){
+        console.log(err);
+    }
+}
+//Vraća sve spaceove zadatog grada
 const GetSpacesByCity =  async(req,res) => {
     try{
         redisData = await redis_client.get(`GetSpacesByCity-${req.params.city}`)
@@ -155,7 +176,7 @@ const GetSpacesByCity =  async(req,res) => {
         console.log(err);
     }
 }
-
+//Preporučuje space-ove u odnosu na prethodne rezervacije koje je korisnik već realizovao u zadatom gradu za FREELANCER tip korisnika
 const GetRecommendedSpacesFreelancer =  async(req,res) => {
     try{
         redisData = await redis_client.get(`GetRecommendedSpacesFreelancer-${req.params.ID}${req.params.city}`)
@@ -173,7 +194,7 @@ const GetRecommendedSpacesFreelancer =  async(req,res) => {
         console.error(err);
     }
 }
-
+//Preporučuje space-ove u odnosu na prethodne rezervacije koje je korisnik već realizovao u zadatom gradu za BUSINESS tip korisnika
 const GetRecommendedSpacesBusiness =  async(req,res) => {
     try{
         redisData = await redis_client.get(`GetRecommendedSpacesBusiness-${req.params.ID}${req.params.city}`)
@@ -202,5 +223,6 @@ module.exports = {
     GetSpacesByCity,
     GetRecommendedSpacesFreelancer,
     GetRecommendedSpacesBusiness,
-    Get10Spaces
+    Get10Spaces,
+    GetCities
 };

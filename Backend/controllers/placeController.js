@@ -33,7 +33,7 @@ const GetPlace = async(req,res) =>{
         res.status(500).end(e.message || e.toString())
     }
 }
-
+//Kreiranje mesta
 const CreatePlace = async (req,res) => {    
     const placeBody = req.body
     let redisData = await redis_client.get(`GetPlacesByRoomId-${req.body.roomID}`)
@@ -95,7 +95,7 @@ const UpdatePlace = async (req,res) => {
         res.status(500).send(e);
     }
 }
-
+//Vraća mesta po RoomID-u
 const GetPlacesByRoomId = async (req,res) => {
     try {
         redisData = await redis_client.get(`GetPlacesByRoomId-${req.params.ID}`)

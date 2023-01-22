@@ -36,7 +36,7 @@ const GetRoom = async(req,res) =>{
         res.status(500).end(e.message || e.toString())
     }
 }
-
+//Kreira novu Sobu
 const CreateRoom = async (req,res) => {   
     const roomBody = req.body 
     let redisData = await redis_client.get(`GetRoomsBySpaceId-${req.body.spaceID}`)
@@ -100,7 +100,7 @@ const UpdateRoom = async (req,res) => {
         res.status(500).send(e);
     }
 }
-
+//Vraća sve sobe po ID-u Space-a u kome se nalazi
 const GetRoomsBySpaceId = async (req,res) => {
     try {
         redisData = await redis_client.get(`GetRoomsBySpaceId-${req.params.ID}`)

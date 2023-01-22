@@ -6,11 +6,14 @@
             <button v-if="isPropertyOwner" @click="openOwnerDashboard">OWNER DASHBOARD</button>
             <button @click="loginClick">{{(getUser?'LOGOUT':'LOGIN')}}</button>
         </div>
-        <search-bar pocetnoMesto="Užice" @pronadjeno="searchPronadjen"/>
-        <h3 v-if="recommendedSpaces && recommendedSpaces.length>0">RECOMMENDED FOR YOU:</h3>
-        <space-list v-if="recommendedSpaces" :list="recommendedSpaces" type="space" />
-        <h3>ALL:</h3>
-        <space-list :list="spaces" type="space" />
+        
+        <search-bar @searchBy="searchBy" @cancelFilter="cancelFilter"/>
+        <h3 v-if="recommendedSpaces && recommendedSpaces.length>0 && filtering">RECOMMENDED FOR YOU:</h3>
+        <space-list v-if="recommendedSpaces && filtering" :list="recommendedSpaces" type="space" />
+        <h3 v-if="filtering">ALL:</h3>
+        <space-list v-if="filtering" :list="spaces" type="space" />
+        <h3 v-if="!filtering">10 spaces:</h3>
+        <space-list v-if="!filtering" :list="spaces" type="space"/>
     </div>
 </template>
 
@@ -33,11 +36,12 @@ export default defineComponent({
         }
     },
     methods:{
-        //@DIMI
-        async searchPronadjen(mesto, broj){
+        async searchBy(mesto){
+            
             await this.$store.dispatch('getSpacesByCity', mesto);
+            this.filtering = true;
             this.spaces= this.$store.getters['getSpaces'];
-            console.log(mesto, broj);
+            this.getRecommended(mesto);
         },
         loginClick(){
 
@@ -49,13 +53,29 @@ export default defineComponent({
         },
         openOwnerDashboard(){
             this.$router.push({name:'Owner'});
+        },
+        async getRecommended(city){
+            let url = 'getRecommendedSpacesFreelancer';
+            if(this.user.role == 'business') url = 'getRecommendedSpacesBusienss';
+            await this.$store.dispatch(url, {
+                city:city,
+                userID:this.user.ID
+            });
+            this.recommendedSpaces = this.$store.getters['getRecommendedSpaces'];
+            if(!this.recommendedSpaces) this.recommendedSpaces = [];
+        },
+        async cancelFilter(){
+            this.filtering = false;
+            await this.$store.dispatch('get10Spaces');        
+            this.spaces = this.$store.getters['getSpaces'];
         }
     },
     data(){
         return{
             spaces:[],
             recommendedSpaces:[],
-            user:null
+            user:null,
+            filtering:false
         }
     },
     async created(){
@@ -64,19 +84,8 @@ export default defineComponent({
             await this.$store.dispatch('getUser', this.$cookies.get('uId'));
             this.user = this.$store.getters['getUser'];
         } 
-        await this.$store.dispatch('getSpacesByCity', 'Nis');        
-        this.spaces = this.$store.getters['getSpaces'];
-        if(this.user.role!='owner'){
-            let url = 'getRecommendedSpacesFreelancer';
-            if(this.user.role == 'business') url = 'getRecommendedSpacesBusienss';
-            console.log(url);
-            await this.$store.dispatch(url, {
-                city:'Nis',
-                userID:this.user.ID
-            });
-            this.recommendedSpaces = this.$store.getters['getRecommendedSpaces'];
-            if(!this.recommendedSpaces) this.recommendedSpaces = [];
-        }
+        await this.$store.dispatch('get10Spaces');        
+        this.spaces = this.$store.getters['getSpaces'];        
     }
 })
 </script>
