@@ -325,7 +325,7 @@ export default new Vuex.Store({
         },
         async getPendingRequests({commit},id){
             try{
-                let res = await Api().get(`api/reservation/getPendingReservationByOwnerId/${id}`); 
+                let res = await Api().get(`api/reservation/getPendingReservationsByOwnerId/${id}`); 
                 if(res.status == 200){
                     console.log("STIGLO", res.data);
                     commit('setRequests', res.data);

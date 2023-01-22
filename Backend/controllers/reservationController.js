@@ -1,9 +1,6 @@
 const neo4j = require('../config/neo4j_config');
-const reservation = require('../models/reservationModel');
-//const owner = require('../models/ownerModel');
-//const { GetSpaceByOwnerId } = require('./spaceController');
-//const { GetRoomsBySpaceId } = require('./roomController');
-
+const redis_client = require('../config/redis_config')
+const {cypherLookup} = require('../helpers')
 const ReservationsToJSON = (records) =>{
     let item= []
     records.forEach(element => {
@@ -65,15 +62,31 @@ const GetReservation = async(req,res) =>{
 const AcceptReservation = async (req,res) => {
     try {
         let reservation = await neo4j.model('Reservation').find(req.params.ID);
+        
         if (!reservation) { 
             res.status(400).send("Couldn't find reservation.");
             return;
         }
-        await reservation.update({
-            //dateStart: req.body.dateStart,
-            //: req.body.dateEnd,
+        await reservation.update({            
             status:'accepted'
         });
+        cypher = await neo4j.cypher(`Match (o:Owner)-[:RESFOROWNER]->(r:Reservation {ID:"${req.params.ID}"})<-[:RENT]-(u:User) return o, u`)
+        let owner = cypherLookup(cypher.records, 'o');
+        let user = cypherLookup(cypher.records,'u');
+        let reso = {
+            dateStart: reservation._properties.get('dateStart'),
+            dateEnd: reservation._properties.get('dateEnd'),
+            status:reservation._properties.get('status')
+        };
+        let msg = {
+            messageType: "reservation",
+            messageSubType: "business",
+            destination: user[0].properties.ID,//OWNER ID,
+            sender: owner[0].properties.ID, //USER ID,
+            reservation: reso, //RESERVATION
+        }
+        console.log(msg);
+        redis_client.publish("app:user", JSON.stringify(msg));
         res.status(200).send();
     } catch (e) {
         console.log(e);
@@ -107,18 +120,24 @@ const CreateReservationAsBusiness = async (req,res) => {
         dateEnd: reservationBody.dateEnd,
         status:'pending'
     }).then(async reservation => {                        
-            neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.placeID}"}) <-[:HASROOMS]-(:Space) <-[:OWNER] - (o:Owner),(b:Business {ID: "${req.body.userID}"}) create (ro)-[rel1:RENTROOM]->(r), (b)-[rel2:BRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,b,ro,rel1,rel2`)
-            .then(result => {
-                console.log(result);                 
-            })
-            .catch(err => console.log(err))
-       
-        res.send({
+        let ans = await neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(ro:Room {ID: "${req.body.placeID}"}) <-[:HASROOMS]-(:Space) <-[:OWNER] - (o:Owner),(b:Business {ID: "${req.body.userID}"}) create (ro)-[:RENTROOM]->(r), (b)-[:BRENT]->(r), (b)-[:RENT]->(r), (o)-[:RESFOROWNER]->(r) return  o,b `);
+        let owner = cypherLookup(ans.records, 'o');
+        let business = cypherLookup(ans.records, 'b');
+        let reso = {
             dateStart: reservation._properties.get('dateStart'),
             dateEnd: reservation._properties.get('dateEnd'),
             status:reservation._properties.get('status')
-
-        }).status(200)
+        };
+        let msg = {
+            messageType: "reservation",
+            messageSubType: "business",
+            destination: owner[0].properties.ID,//OWNER ID,
+            sender: business[0].properties.ID, //USER ID,
+            reservation: reso, //RESERVATION
+        }
+        redis_client.publish("app:user", JSON.stringify(msg));
+        
+        res.send(reso).status(200)
             
         })        
     .catch(err => res.send(err).status(400));
@@ -132,7 +151,7 @@ const CreateReservationAsFreelancer = async (req,res) => {
         status:'pending'
     }).then(async reservation => {    
                                      
-        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[rel1:RENTPLACE]->(r), (f)-[rel2:FRENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,f,p,rel1,rel2`)
+        neo4j.writeCypher(`match (r:Reservation {ID: "${reservation._properties.get("ID")}"}),(p:Place {ID: "${req.body.placeID}"}) <-[:HASPLACES]-(:Room) <-[HASROOMS]-(:Space) <-[:OWNER]-(o:Owner),(f:Freelancer {ID: "${req.body.userID}"}) create (p)-[:RENTPLACE]->(r), (f)-[:FRENT]->(r),(f)-[:RENT]->(r), (o)-[:RESFOROWNER]->(r) return  r,f,p,`)
         .then(result => {
                 console.log(result);       
                 res.send({

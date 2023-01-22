@@ -1,47 +1,35 @@
-module.exports = {
-    
-    RecordsToJSON : (records) =>{
-        let item= []    
-        records.forEach(element => {       
-            
-            item.push(element._fields[0].properties)
-        })
-        return item
-    },
 
-    NodeTOString : (node) =>{
-       return JSON.stringify(Object.fromEntries(node._properties));
-    },
-    NodeToJson : (node) => { 
-        return Object.fromEntries(node._properties);
-    },
-    sortStoresBy : (stores,sortFilter) => { 
-        stores.sort((a,b) => {
-              
-               //#region OpisFje
-                // a,b
-                // > 0 sort b before a 
-                // < 0 sort a before b
-                // === 0 keep original order of a and b
-                //    function compare(a, b) {
-                //     if (a is less than b by some ordering criterion) {
-                //       return -1;
-                //     }
-                //     if (a is greater than b by the ordering criterion) {
-                //       return 1;
-                //     }
-                //     // a must be equal to b
-                //     return 0;
-                //   }
-               //#endregion
-
-            if (!a[sortFilter]) return -1;
-            if (!b[sortFilter]) return 1;
-            if (a[sortFilter] > b[sortFilter]) return  1
-            if (a[sortFilter]< b[sortFilter]) return -1
-            return 0
-        })
-        return stores;
+const keyIndexLookup = (keys, tag)=>{
+    for(let i = 0;i<keys.length;i++){
+        if(keys[i] == tag) return i;
     }
-    
+    return -1;
+}
+
+const newToArray = (arr, item)=>{
+    arr.forEach(element=>{
+        if(element.properties.ID == item.properties.ID) return false;
+    })
+    return true;
+}
+//Ova funkcija se koristi kako bi izvukli potrebne informacije iz recorda
+//Saljemo tag kako bi odredili tip podataka
+//I to se prosledjuje dalje
+
+const cypherLookup = (records, tag)=>{    
+    if(!records || records.length==0) return [];
+    console.log(records);
+    let arr = [];
+    let i = keyIndexLookup(records[0].keys, tag);
+    records.forEach(record=>{
+        let item = record._fields[i];
+        if(newToArray(arr, item)){
+            arr.push(item);
+        }
+    })
+    return arr;    
+}
+
+module.exports = {  
+    cypherLookup    
 }

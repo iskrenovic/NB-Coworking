@@ -2,46 +2,30 @@ const redis_client = require('./redis_config')
 const WebSocket = require('ws')
 
 
-const WEB_SOCKET_PORT_CUSTOMER = 3000;
-const WEB_SOCKET_PORT_DELIVERER = 3001;
-const WEB_SOCKET_PORT_STORE = 3002;
+const WEB_SOCKET_PORT_USER = 3300;
 
-const serverCustomer = new WebSocket.Server({ port : WEB_SOCKET_PORT_CUSTOMER });
-const serverDeliverer = new WebSocket.Server({ port : WEB_SOCKET_PORT_DELIVERER });
-const serverStore = new WebSocket.Server({ port : WEB_SOCKET_PORT_STORE });
+const serverUser = new WebSocket.Server({ port : WEB_SOCKET_PORT_USER });
+var redisUserClient = redis_client.duplicate();
+redisUserClient.connect();
 
-
-// // Register event for client connection
-serverCustomer.on('connection', async function connection(ws) {
-//   // broadcast on web socket when receving a Redis PUB/SUB Event
-  var redisCustomer = redis_client.duplicate();
-  await redisCustomer.connect();
-  redisCustomer.subscribe('app:customer',  (message) => { 
-    ws.send(message)
-  });
-    
-
+serverUser.on('connection',  async function connection(ws) {
+    ws.on('message', async (data)=>{
+        let response = JSON.parse(data)
+        console.log("PRIJAVLJEN", response);    
+        if(response.init){
+            ws.id = response.ID;
+        }
+    })
 });
 
-serverDeliverer.on('connection',  async function connection(ws) {
 
-//   // broadcast on web socket when receving a Redis PUB/SUB Event
-  var redisDeliverer = redis_client.duplicate();
-  await redisDeliverer.connect();
-  redisDeliverer.subscribe('app:deliverer', message => { 
-    ws.send(message)
-  });
-
-});
-
-serverStore.on('connection', async  function connection(ws) {
-//   // broadcast on web socket when receving a Redis PUB/SUB Event
-  var redisStore = redis_client.duplicate();
-  await redisStore.connect();
-  redisStore.subscribe('app:store', message => { 
-    ws.send(message)
-  });
-    
-});
+redisUserClient.SUBSCRIBE('app:user',(message)=>{
+    let msg = JSON.parse(message);
+    serverUser.clients.forEach(client=>{
+        console.log("POKUSAVAM DA POSALJEM", client);
+        if(client.id == msg.destination)
+            client.send(JSON.stringify(message));
+    })
+})
 
 module.exports = redis_client;
